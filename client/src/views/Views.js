@@ -9,6 +9,7 @@ import {
   DashboardOutlined,
   BugOutlined,
   ReadOutlined,
+  ApartmentOutlined,
   MessageOutlined,
 } from "@ant-design/icons";
 import FilesManager from "./FilesManager";
