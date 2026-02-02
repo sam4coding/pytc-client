@@ -29,6 +29,7 @@ Format most code with `prettier`:
 ```
 npm install
 npx prettier --write .
+npx biome format --write .
 ```
 
 Format python code with `black`:

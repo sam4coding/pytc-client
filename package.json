@@ -1,5 +1,6 @@
 {
-  "devDependencies": {
-    "prettier": "^3.8.1"
-  }
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.13",
+		"prettier": "^3.8.1"
+	}
 }
