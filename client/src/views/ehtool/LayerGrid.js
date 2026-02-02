@@ -1,62 +1,89 @@
-import React from 'react';
-import { Row, Col, Card, Pagination, Empty, Badge, Checkbox } from 'antd';
-import { CheckCircleOutlined, CloseCircleOutlined, QuestionCircleOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
+import React from "react";
+import { Row, Col, Card, Pagination, Empty, Badge, Checkbox } from "antd";
+import {
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  QuestionCircleOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
 
 /**
  * Layer Grid Component
  * Displays layers in a grid with thumbnails and classification status
  */
-function LayerGrid({ layers, selectedLayers, onLayerSelect, onLayerClick, currentPage, totalPages, onPageChange }) {
+function LayerGrid({
+  layers,
+  selectedLayers,
+  onLayerSelect,
+  onLayerClick,
+  currentPage,
+  totalPages,
+  onPageChange,
+}) {
   const getClassificationIcon = (classification) => {
     switch (classification) {
-      case 'correct':
-        return <CheckCircleOutlined style={{ color: '#52c41a', fontSize: '20px' }} />;
-      case 'incorrect':
-        return <CloseCircleOutlined style={{ color: '#ff4d4f', fontSize: '20px' }} />;
-      case 'unsure':
-        return <QuestionCircleOutlined style={{ color: '#faad14', fontSize: '20px' }} />;
-      case 'error':
+      case "correct":
+        return (
+          <CheckCircleOutlined style={{ color: "#52c41a", fontSize: "20px" }} />
+        );
+      case "incorrect":
+        return (
+          <CloseCircleOutlined style={{ color: "#ff4d4f", fontSize: "20px" }} />
+        );
+      case "unsure":
+        return (
+          <QuestionCircleOutlined
+            style={{ color: "#faad14", fontSize: "20px" }}
+          />
+        );
+      case "error":
       default:
-        return <ExclamationCircleOutlined style={{ color: '#d9d9d9', fontSize: '20px' }} />;
+        return (
+          <ExclamationCircleOutlined
+            style={{ color: "#d9d9d9", fontSize: "20px" }}
+          />
+        );
     }
   };
 
   const getClassificationColor = (classification) => {
     switch (classification) {
-      case 'correct':
-        return '#52c41a';
-      case 'incorrect':
-        return '#ff4d4f';
-      case 'unsure':
-        return '#faad14';
-      case 'error':
+      case "correct":
+        return "#52c41a";
+      case "incorrect":
+        return "#ff4d4f";
+      case "unsure":
+        return "#faad14";
+      case "error":
       default:
-        return '#d9d9d9';
+        return "#d9d9d9";
     }
   };
 
   const getClassificationText = (classification) => {
     switch (classification) {
-      case 'correct':
-        return 'Correct';
-      case 'incorrect':
-        return 'Incorrect';
-      case 'unsure':
-        return 'Unsure';
-      case 'error':
+      case "correct":
+        return "Correct";
+      case "incorrect":
+        return "Incorrect";
+      case "unsure":
+        return "Unsure";
+      case "error":
       default:
-        return 'Unreviewed';
+        return "Unreviewed";
     }
   };
 
   if (layers.length === 0) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100%'
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+        }}
+      >
         <Empty description="No layers to display" />
       </div>
     );
@@ -77,51 +104,59 @@ function LayerGrid({ layers, selectedLayers, onLayerSelect, onLayerClick, curren
                 <Card
                   hoverable
                   style={{
-                    border: isSelected ? '2px solid #1890ff' : '1px solid #d9d9d9',
-                    boxShadow: isSelected ? '0 0 10px rgba(24, 144, 255, 0.3)' : 'none',
-                    cursor: 'pointer',
-                    position: 'relative'
+                    border: isSelected
+                      ? "2px solid #1890ff"
+                      : "1px solid #d9d9d9",
+                    boxShadow: isSelected
+                      ? "0 0 10px rgba(24, 144, 255, 0.3)"
+                      : "none",
+                    cursor: "pointer",
+                    position: "relative",
                   }}
-                  bodyStyle={{ padding: '8px' }}
+                  bodyStyle={{ padding: "8px" }}
                   onClick={() => onLayerClick && onLayerClick(layer)}
                   cover={
-                    <div style={{ position: 'relative' }}>
+                    <div style={{ position: "relative" }}>
                       {/* Selection Checkbox Overlay */}
                       <div
                         style={{
-                          position: 'absolute',
-                          top: '8px',
-                          left: '8px',
+                          position: "absolute",
+                          top: "8px",
+                          left: "8px",
                           zIndex: 10,
-                          backgroundColor: 'rgba(255,255,255,0.8)',
-                          borderRadius: '4px',
-                          padding: '2px 4px'
+                          backgroundColor: "rgba(255,255,255,0.8)",
+                          borderRadius: "4px",
+                          padding: "2px 4px",
                         }}
                         onClick={(e) => e.stopPropagation()}
                       >
                         <Checkbox
                           checked={isSelected}
-                          onChange={(e) => onLayerSelect && onLayerSelect(layer.id)}
+                          onChange={(e) =>
+                            onLayerSelect && onLayerSelect(layer.id)
+                          }
                         />
                       </div>
 
                       {layer.image_base64 ? (
-                        <div style={{
-                          position: 'relative',
-                          paddingTop: '100%', // 1:1 aspect ratio
-                          background: '#000',
-                          overflow: 'hidden'
-                        }}>
+                        <div
+                          style={{
+                            position: "relative",
+                            paddingTop: "100%", // 1:1 aspect ratio
+                            background: "#000",
+                            overflow: "hidden",
+                          }}
+                        >
                           <img
                             src={layer.image_base64}
                             alt={layer.layer_name}
                             style={{
-                              position: 'absolute',
+                              position: "absolute",
                               top: 0,
                               left: 0,
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'contain'
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "contain",
                             }}
                           />
                           {layer.mask_base64 && (
@@ -129,52 +164,60 @@ function LayerGrid({ layers, selectedLayers, onLayerSelect, onLayerClick, curren
                               src={layer.mask_base64}
                               alt="mask"
                               style={{
-                                position: 'absolute',
+                                position: "absolute",
                                 top: 0,
                                 left: 0,
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain',
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "contain",
                                 opacity: 0.5,
-                                mixBlendMode: 'screen'
+                                mixBlendMode: "screen",
                               }}
                             />
                           )}
                         </div>
                       ) : (
-                        <div style={{
-                          paddingTop: '100%',
-                          background: '#f0f0f0',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center'
-                        }}>
+                        <div
+                          style={{
+                            paddingTop: "100%",
+                            background: "#f0f0f0",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
                           Loading...
                         </div>
                       )}
                     </div>
                   }
                 >
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center'
-                  }}>
-                    <span style={{
-                      fontSize: '12px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "12px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
                       {layer.layer_name}
                     </span>
                     {getClassificationIcon(layer.classification)}
                   </div>
-                  <div style={{
-                    fontSize: '11px',
-                    color: '#999',
-                    marginTop: '4px'
-                  }}>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#999",
+                      marginTop: "4px",
+                    }}
+                  >
                     Layer {layer.layer_index + 1}
                   </div>
                 </Card>
@@ -185,11 +228,13 @@ function LayerGrid({ layers, selectedLayers, onLayerSelect, onLayerClick, curren
       </Row>
 
       {totalPages > 1 && (
-        <div style={{
-          marginTop: '24px',
-          display: 'flex',
-          justifyContent: 'center'
-        }}>
+        <div
+          style={{
+            marginTop: "24px",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
           <Pagination
             current={currentPage}
             total={totalPages * 12} // Approximate total items

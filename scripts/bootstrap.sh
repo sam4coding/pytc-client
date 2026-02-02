@@ -3,13 +3,13 @@
 set -euo pipefail
 
 if ! command -v uv >/dev/null 2>&1; then
-    echo "uv is required. Install it from https://docs.astral.sh/uv/." >&2
-    exit 1
+	echo "uv is required. Install it from https://docs.astral.sh/uv/." >&2
+	exit 1
 fi
 
 if ! command -v npm >/dev/null 2>&1; then
-    echo "npm is required to run the Electron client." >&2
-    exit 1
+	echo "npm is required to run the Electron client." >&2
+	exit 1
 fi
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

@@ -6,14 +6,14 @@ API_PID=""
 PYTC_PID=""
 
 cleanup() {
-    local exit_code=$?
-    for pid in "${API_PID}" "${PYTC_PID}"; do
-        if [[ -n "${pid}" ]] && kill -0 "${pid}" 2>/dev/null; then
-            kill "${pid}" 2>/dev/null || true
-        fi
-    done
-    wait || true
-    exit "${exit_code}"
+	local exit_code=$?
+	for pid in "${API_PID}" "${PYTC_PID}"; do
+		if [[ -n "${pid}" ]] && kill -0 "${pid}" 2>/dev/null; then
+			kill "${pid}" 2>/dev/null || true
+		fi
+	done
+	wait || true
+	exit "${exit_code}"
 }
 
 trap cleanup EXIT INT TERM

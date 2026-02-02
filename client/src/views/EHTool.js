@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Layout } from 'antd';
-import { BugOutlined } from '@ant-design/icons';
-import DetectionWorkflow from './ehtool/DetectionWorkflow';
+import React, { useState, useEffect } from "react";
+import { Layout } from "antd";
+import { BugOutlined } from "@ant-design/icons";
+import DetectionWorkflow from "./ehtool/DetectionWorkflow";
 
 const { Content } = Layout;
 
@@ -9,7 +9,12 @@ const { Content } = Layout;
  * EHTool Main Component
  * Error Handling Tool for detecting and classifying errors in image stacks
  */
-function EHTool({ onStartProofreading, onSessionChange, refreshTrigger, savedSessionId }) {
+function EHTool({
+  onStartProofreading,
+  onSessionChange,
+  refreshTrigger,
+  savedSessionId,
+}) {
   // Initialize with saved session if available
   const [sessionId, setSessionId] = useState(savedSessionId || null);
 
@@ -28,14 +33,14 @@ function EHTool({ onStartProofreading, onSessionChange, refreshTrigger, savedSes
   }, [sessionId, onSessionChange]);
 
   return (
-    <Layout style={{ height: '100%', background: '#fff' }}>
-      <Content style={{ padding: '16px' }}>
-        <div style={{ marginBottom: '16px' }}>
+    <Layout style={{ height: "100%", background: "#fff" }}>
+      <Content style={{ padding: "16px" }}>
+        <div style={{ marginBottom: "16px" }}>
           <h2 style={{ margin: 0 }}>
-            <BugOutlined style={{ marginRight: '8px' }} />
+            <BugOutlined style={{ marginRight: "8px" }} />
             Error Handling Tool
           </h2>
-          <p style={{ color: '#666', marginTop: '4px' }}>
+          <p style={{ color: "#666", marginTop: "4px" }}>
             Detect and classify errors in image stacks
           </p>
         </div>

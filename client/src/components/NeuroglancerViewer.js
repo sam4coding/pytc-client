@@ -1,16 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Spin, Alert, Typography } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
-import apiClient from '../services/apiClient';
+import React, { useState, useEffect } from "react";
+import { Button, Spin, Alert, Typography } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
+import apiClient from "../services/apiClient";
 
 const { Text, Title } = Typography;
 
 /**
  * NeuroglancerViewer Component
- * 
+ *
  * Loads and displays Neuroglancer viewer in an iframe using the project's image files.
  * Uses the same approach as the Visualization tab.
- * 
+ *
  * @param {number} projectId - Project ID to load viewer for
  * @param {object} currentSynapse - Current synapse for position reference
  */
@@ -29,9 +29,7 @@ function NeuroglancerViewer({ projectId = 1, currentSynapse }) {
     setError(null);
 
     try {
-      const response = await apiClient.get(
-        `/api/synanno/ng-url/${projectId}`
-      );
+      const response = await apiClient.get(`/api/synanno/ng-url/${projectId}`);
 
       if (response.data.url) {
         setViewerUrl(response.data.url);
@@ -45,8 +43,10 @@ function NeuroglancerViewer({ projectId = 1, currentSynapse }) {
         setError(null); // Clear error if it's just a transition message
       }
     } catch (err) {
-      console.error('Failed to load Neuroglancer viewer', err);
-      setError(err.response?.data?.detail || 'Failed to load Neuroglancer viewer');
+      console.error("Failed to load Neuroglancer viewer", err);
+      setError(
+        err.response?.data?.detail || "Failed to load Neuroglancer viewer",
+      );
     } finally {
       setLoading(false);
     }
@@ -58,13 +58,15 @@ function NeuroglancerViewer({ projectId = 1, currentSynapse }) {
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100%',
-        minHeight: '400px'
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          minHeight: "400px",
+        }}
+      >
         <Spin size="large" tip="Loading Neuroglancer viewer..." />
       </div>
     );
@@ -72,21 +74,23 @@ function NeuroglancerViewer({ projectId = 1, currentSynapse }) {
 
   if (error) {
     return (
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100%',
-        padding: '40px',
-        gap: '16px'
-      }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          padding: "40px",
+          gap: "16px",
+        }}
+      >
         <Alert
           message="Failed to Load Viewer"
           description={error}
           type="error"
           showIcon
-          style={{ maxWidth: '600px' }}
+          style={{ maxWidth: "600px" }}
         />
         <Button onClick={loadViewer}>Try Again</Button>
       </div>
@@ -95,16 +99,18 @@ function NeuroglancerViewer({ projectId = 1, currentSynapse }) {
 
   // Display viewer in iframe
   return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <div style={{
-        position: 'absolute',
-        top: 10,
-        right: 10,
-        zIndex: 1000,
-        background: 'rgba(255, 255, 255, 0.9)',
-        borderRadius: '4px',
-        padding: '4px'
-      }}>
+    <div style={{ width: "100%", height: "100%", position: "relative" }}>
+      <div
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 10,
+          zIndex: 1000,
+          background: "rgba(255, 255, 255, 0.9)",
+          borderRadius: "4px",
+          padding: "4px",
+        }}
+      >
         <Button
           type="link"
           icon={<ReloadOutlined />}
@@ -112,7 +118,10 @@ function NeuroglancerViewer({ projectId = 1, currentSynapse }) {
           title="Refresh viewer"
         />
         {currentSynapse && (
-          <Text type="secondary" style={{ marginLeft: '8px', fontSize: '12px' }}>
+          <Text
+            type="secondary"
+            style={{ marginLeft: "8px", fontSize: "12px" }}
+          >
             Synapse #{currentSynapse.id}
           </Text>
         )}
@@ -125,10 +134,10 @@ function NeuroglancerViewer({ projectId = 1, currentSynapse }) {
           frameBorder="0"
           scrolling="no"
           src={viewerUrl}
-          style={{ background: '#000' }}
+          style={{ background: "#000" }}
         />
       ) : (
-        <div style={{ padding: 40, textAlign: 'center' }}>
+        <div style={{ padding: 40, textAlign: "center" }}>
           <Title level={4}>Setup in Progress</Title>
           <Text>Data server is running. Preparing viewer...</Text>
           <div style={{ marginTop: 20 }}>

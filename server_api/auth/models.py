@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
+
 # SQLAlchemy Model
 class User(Base):
     __tablename__ = "users"
@@ -18,24 +19,26 @@ class User(Base):
 
     files = relationship("File", back_populates="owner")
 
+
 class File(Base):
     __tablename__ = "files"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     name = Column(String, index=True)
-    path = Column(String, default="root") # Virtual parent folder key
+    path = Column(String, default="root")  # Virtual parent folder key
     is_folder = Column(Boolean, default=False)
     size = Column(String, default="0KB")
     type = Column(String, default="unknown")
-    physical_path = Column(String, nullable=True) # Path on disk
+    physical_path = Column(String, nullable=True)  # Path on disk
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     owner = relationship("User", back_populates="files")
 
+
 class Project(Base):
     __tablename__ = "projects"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
@@ -44,9 +47,10 @@ class Project(Base):
     label_path = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+
 class Synapse(Base):
     __tablename__ = "synapses"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     project_id = Column(Integer, ForeignKey("projects.id"))
     pre_neuron_id = Column(Integer, nullable=True)
@@ -60,13 +64,16 @@ class Synapse(Base):
     reviewed_at = Column(DateTime(timezone=True), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
+
 # Pydantic Schemas
 class UserBase(BaseModel):
     username: str
     email: Optional[str] = None
 
+
 class UserCreate(UserBase):
     password: str
+
 
 class UserResponse(UserBase):
     id: int
@@ -75,6 +82,7 @@ class UserResponse(UserBase):
     class Config:
         from_attributes = True
 
+
 class FileBase(BaseModel):
     name: str
     path: str = "root"
@@ -82,16 +90,20 @@ class FileBase(BaseModel):
     size: str = "0KB"
     type: str = "unknown"
 
+
 class FileCreate(FileBase):
     pass
+
 
 class FileUpdate(BaseModel):
     name: Optional[str] = None
     path: Optional[str] = None
 
+
 class FileCopy(BaseModel):
     source_id: int
     destination_path: str
+
 
 class FileResponse(FileBase):
     id: int
@@ -102,12 +114,15 @@ class FileResponse(FileBase):
     class Config:
         from_attributes = True
 
+
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
     username: Optional[str] = None
+
 
 # Synapse Proofreading Schemas
 class SynapseResponse(BaseModel):
@@ -120,19 +135,21 @@ class SynapseResponse(BaseModel):
     z: float
     status: str
     confidence: Optional[float]
-    
+
     class Config:
         from_attributes = True
+
 
 class SynapseUpdate(BaseModel):
     status: Optional[str] = None
     pre_neuron_id: Optional[int] = None
     post_neuron_id: Optional[int] = None
 
+
 class ProjectResponse(BaseModel):
     id: int
     name: str
     neuroglancer_url: Optional[str]
-    
+
     class Config:
         from_attributes = True

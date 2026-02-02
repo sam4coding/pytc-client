@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, message, Spin, Empty } from 'antd';
-import apiClient from '../services/apiClient';
-import NeuroglancerViewer from '../components/NeuroglancerViewer';
-import SynapseList from '../components/SynapseList';
-import ProofreadingControls from '../components/ProofreadingControls';
+import React, { useState, useEffect } from "react";
+import { Layout, message, Spin, Empty } from "antd";
+import apiClient from "../services/apiClient";
+import NeuroglancerViewer from "../components/NeuroglancerViewer";
+import SynapseList from "../components/SynapseList";
+import ProofreadingControls from "../components/ProofreadingControls";
 
 const { Sider, Content } = Layout;
 
 /**
  * ProofReading Component
- * 
+ *
  * Main view for synapse proofreading. Integrates Neuroglancer viewer,
  * synapse list, and proofreading controls. Supports keyboard shortcuts
  * for efficient workflow.
@@ -17,7 +17,7 @@ const { Sider, Content } = Layout;
 function ProofReading() {
   const [synapses, setSynapses] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [neuroglancerUrl, setNeuroglancerUrl] = useState('');
+  const [neuroglancerUrl, setNeuroglancerUrl] = useState("");
   const [loading, setLoading] = useState(true);
   const [projectId, setProjectId] = useState(1); // Default to first project
   const [reviewedCount, setReviewedCount] = useState(0);
@@ -32,25 +32,25 @@ function ProofReading() {
   useEffect(() => {
     const handleKeyPress = (e) => {
       // Don't trigger shortcuts when typing in input fields
-      if (e.target.tagName === 'INPUT') return;
+      if (e.target.tagName === "INPUT") return;
 
       switch (e.key.toLowerCase()) {
-        case 'c':
-          updateStatus('correct');
+        case "c":
+          updateStatus("correct");
           break;
-        case 'x':
-          updateStatus('incorrect');
+        case "x":
+          updateStatus("incorrect");
           break;
-        case 'u':
-          updateStatus('unsure');
+        case "u":
+          updateStatus("unsure");
           break;
-        case 'arrowright':
+        case "arrowright":
           goToNext();
           break;
-        case 'arrowleft':
+        case "arrowleft":
           goToPrevious();
           break;
-        case 's':
+        case "s":
           saveCurrent();
           break;
         default:
@@ -58,8 +58,8 @@ function ProofReading() {
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [currentIndex, synapses]);
 
   /**
@@ -72,13 +72,13 @@ function ProofReading() {
       setSynapses(res.data);
 
       // Count reviewed synapses (not in error state)
-      const reviewed = res.data.filter(s => s.status !== 'error').length;
+      const reviewed = res.data.filter((s) => s.status !== "error").length;
       setReviewedCount(reviewed);
 
       setLoading(false);
     } catch (err) {
-      console.error('Failed to fetch synapses', err);
-      message.error('Failed to load synapses');
+      console.error("Failed to fetch synapses", err);
+      message.error("Failed to load synapses");
       setLoading(false);
     }
   };
@@ -91,8 +91,8 @@ function ProofReading() {
       const res = await apiClient.get(`/api/synanno/ng-url/${projectId}`);
       setNeuroglancerUrl(res.data.url);
     } catch (err) {
-      console.error('Failed to fetch Neuroglancer URL', err);
-      message.error('Failed to load Neuroglancer viewer');
+      console.error("Failed to fetch Neuroglancer URL", err);
+      message.error("Failed to load Neuroglancer viewer");
     }
   };
 
@@ -114,22 +114,19 @@ function ProofReading() {
     if (!synapses[currentIndex]) return;
 
     try {
-      await apiClient.put(
-        `/api/synapses/${synapses[currentIndex].id}`,
-        {
-          status: synapses[currentIndex].status,
-          pre_neuron_id: synapses[currentIndex].pre_neuron_id,
-          post_neuron_id: synapses[currentIndex].post_neuron_id
-        }
-      );
-      message.success('Synapse updated');
+      await apiClient.put(`/api/synapses/${synapses[currentIndex].id}`, {
+        status: synapses[currentIndex].status,
+        pre_neuron_id: synapses[currentIndex].pre_neuron_id,
+        post_neuron_id: synapses[currentIndex].post_neuron_id,
+      });
+      message.success("Synapse updated");
 
       // Update reviewed count
-      const reviewed = synapses.filter(s => s.status !== 'error').length;
+      const reviewed = synapses.filter((s) => s.status !== "error").length;
       setReviewedCount(reviewed);
     } catch (err) {
-      console.error('Failed to update synapse', err);
-      message.error('Failed to save changes');
+      console.error("Failed to update synapse", err);
+      message.error("Failed to save changes");
     }
   };
 
@@ -142,7 +139,7 @@ function ProofReading() {
     try {
       await apiClient.put(
         `/api/synapses/${synapses[currentIndex].id}`,
-        updates
+        updates,
       );
 
       // Update local state
@@ -150,14 +147,14 @@ function ProofReading() {
       updated[currentIndex] = { ...updated[currentIndex], ...updates };
       setSynapses(updated);
 
-      message.success('Synapse updated');
+      message.success("Synapse updated");
 
       // Update reviewed count
-      const reviewed = updated.filter(s => s.status !== 'error').length;
+      const reviewed = updated.filter((s) => s.status !== "error").length;
       setReviewedCount(reviewed);
     } catch (err) {
-      console.error('Failed to update synapse', err);
-      message.error('Failed to save changes');
+      console.error("Failed to update synapse", err);
+      message.error("Failed to save changes");
     }
   };
 
@@ -168,7 +165,7 @@ function ProofReading() {
     if (currentIndex < synapses.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
-      message.info('You have reached the last synapse');
+      message.info("You have reached the last synapse");
     }
   };
 
@@ -179,20 +176,22 @@ function ProofReading() {
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
     } else {
-      message.info('You are at the first synapse');
+      message.info("You are at the first synapse");
     }
   };
 
   // Loading state
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100%',
-        minHeight: '400px'
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          minHeight: "400px",
+        }}
+      >
         <Spin size="large" tip="Loading synapses..." />
       </div>
     );
@@ -201,13 +200,15 @@ function ProofReading() {
   // Empty state
   if (synapses.length === 0) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100%',
-        minHeight: '400px'
-      }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          minHeight: "400px",
+        }}
+      >
         <Empty
           description="No synapses found for proofreading"
           image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -217,14 +218,14 @@ function ProofReading() {
   }
 
   return (
-    <Layout style={{ height: 'calc(100vh - 160px)', background: '#fff' }}>
+    <Layout style={{ height: "calc(100vh - 160px)", background: "#fff" }}>
       {/* Left Panel: Synapse List */}
       <Sider
         width="15%"
         theme="light"
         style={{
-          borderRight: '1px solid #f0f0f0',
-          minWidth: '200px'
+          borderRight: "1px solid #f0f0f0",
+          minWidth: "200px",
         }}
       >
         <SynapseList
@@ -236,7 +237,7 @@ function ProofReading() {
       </Sider>
 
       {/* Center: Neuroglancer Viewer */}
-      <Content style={{ padding: '16px', background: '#fafafa' }}>
+      <Content style={{ padding: "16px", background: "#fafafa" }}>
         <NeuroglancerViewer
           url={neuroglancerUrl}
           currentSynapse={synapses[currentIndex]}
@@ -248,8 +249,8 @@ function ProofReading() {
         width="15%"
         theme="light"
         style={{
-          borderLeft: '1px solid #f0f0f0',
-          minWidth: '200px'
+          borderLeft: "1px solid #f0f0f0",
+          minWidth: "200px",
         }}
       >
         <ProofreadingControls

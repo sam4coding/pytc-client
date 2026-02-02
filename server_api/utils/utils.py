@@ -1,5 +1,6 @@
 import pathlib
 
+
 def process_path(path):
     if not path:
         return None

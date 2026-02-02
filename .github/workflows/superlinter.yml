@@ -1,8 +1,13 @@
 ---
 name: Super-Linter
 
-'on':
-  push: {}
+"on":
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   super-lint:
@@ -17,3 +22,12 @@ jobs:
         env:
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_CSS_PRETTIER: true
+          VALIDATE_HTML_PRETTIER: true
+          VALIDATE_JAVASCRIPT_PRETTIER: true
+          VALIDATE_JSON_PRETTIER: true
+          VALIDATE_MARKDOWN_PRETTIER: true
+          VALIDATE_YAML_PRETTIER: true
+          VALIDATE_PYTHON_BLACK: true
+          VALIDATE_SHELL_SHFMT: true

@@ -1,52 +1,52 @@
 // global localStorage
-import React, { useContext, useState } from 'react'
-import { Button, Space } from 'antd'
-import { startModelInference, stopModelInference } from '../utils/api'
-import Configurator from '../components/Configurator'
-import { AppContext } from '../contexts/GlobalContext'
+import React, { useContext, useState } from "react";
+import { Button, Space } from "antd";
+import { startModelInference, stopModelInference } from "../utils/api";
+import Configurator from "../components/Configurator";
+import { AppContext } from "../contexts/GlobalContext";
 
 function ModelInference({ isInferring, setIsInferring }) {
-  const context = useContext(AppContext)
+  const context = useContext(AppContext);
   // const [isInference, setIsInference] = useState(false)
   const handleStartButton = async () => {
     try {
-      const inferenceConfig = localStorage.getItem('inferenceConfig')
+      const inferenceConfig = localStorage.getItem("inferenceConfig");
 
       const getPath = (val) => {
-        if (!val) return '';
-        if (typeof val === 'string') return val;
-        return val.path || '';
-      }
+        if (!val) return "";
+        if (typeof val === "string") return val;
+        return val.path || "";
+      };
 
       // const res = startModelInference(
       const res = await startModelInference(
         context.uploadedYamlFile.name,
         inferenceConfig,
         getPath(context.outputPath),
-        getPath(context.checkpointPath)
-      ) // inputs, configurationYaml
-      console.log(res)
+        getPath(context.checkpointPath),
+      ); // inputs, configurationYaml
+      console.log(res);
     } catch (e) {
-      console.log(e)
+      console.log(e);
     } finally {
       // setIsInference(true)
-      setIsInferring(true)
+      setIsInferring(true);
     }
-  }
+  };
 
   const handleStopButton = async () => {
     try {
-      await stopModelInference()
+      await stopModelInference();
     } catch (e) {
-      console.log(e)
+      console.log(e);
     } finally {
       // setIsInference(false)
-      setIsInferring(false)
+      setIsInferring(false);
     }
-  }
+  };
 
   // const [componentSize, setComponentSize] = useState("default");
-  const [componentSize] = useState('default')
+  const [componentSize] = useState("default");
   // const onFormLayoutChange = ({ size }) => {
   //   setComponentSize(size);
   // };
@@ -54,7 +54,7 @@ function ModelInference({ isInferring, setIsInferring }) {
   return (
     <>
       <div>
-        <Configurator fileList={context.files} type='inference' />
+        <Configurator fileList={context.files} type="inference" />
         <Space wrap style={{ marginTop: 12 }} size={componentSize}>
           <Button
             onClick={handleStartButton}
@@ -71,7 +71,7 @@ function ModelInference({ isInferring, setIsInferring }) {
         </Space>
       </div>
     </>
-  )
+  );
 }
 
-export default ModelInference
+export default ModelInference;

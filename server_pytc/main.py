@@ -10,11 +10,11 @@ from server_pytc.services.model import (
     stop_training,
 )
 
-print("\n" + "="*80)
+print("\n" + "=" * 80)
 print("SERVER_PYTC STARTING UP")
 print(f"Python executable: {__import__('sys').executable}")
 print(f"Working directory: {__import__('os').getcwd()}")
-print("="*80 + "\n")
+print("=" * 80 + "\n")
 
 app = FastAPI()
 
@@ -39,8 +39,10 @@ async def start_model_training(req: Request):
     print(f"[SERVER_PYTC] Received request payload keys: {list(req.keys())}")
     print(f"[SERVER_PYTC] Arguments: {req.get('arguments', {})}")
     print(f"[SERVER_PYTC] Log path: {req.get('logPath', 'NOT PROVIDED')}")
-    print(f"[SERVER_PYTC] Training config preview: {req.get('trainingConfig', '')[:200]}...")
-    
+    print(
+        f"[SERVER_PYTC] Training config preview: {req.get('trainingConfig', '')[:200]}..."
+    )
+
     try:
         print("[SERVER_PYTC] Calling start_training()...")
         result = start_training(req)
@@ -50,8 +52,11 @@ async def start_model_training(req: Request):
     except Exception as e:
         print(f"[SERVER_PYTC] ✗ ERROR in start_training: {type(e).__name__}: {str(e)}")
         import traceback
+
         print(traceback.format_exc())
-        print("========== SERVER_PYTC: END OF START_MODEL_TRAINING (WITH ERROR) ==========\n")
+        print(
+            "========== SERVER_PYTC: END OF START_MODEL_TRAINING (WITH ERROR) ==========\n"
+        )
         raise
 
 
@@ -65,17 +70,17 @@ async def stop_model_training():
 async def get_training_status():
     """Check if training process is still running"""
     from server_pytc.services.model import _training_process
-    
+
     if _training_process is None:
         return {"isRunning": False, "message": "No training process"}
-    
+
     poll_result = _training_process.poll()
     is_running = poll_result is None
-    
+
     return {
         "isRunning": is_running,
         "pid": _training_process.pid if is_running else None,
-        "exitCode": poll_result if not is_running else None
+        "exitCode": poll_result if not is_running else None,
     }
 
 
@@ -104,9 +109,9 @@ async def stop_model_inference():
 
 
 def run():
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("SERVER_PYTC: Starting Uvicorn server on port 4243...")
-    print("="*80 + "\n")
+    print("=" * 80 + "\n")
     uvicorn.run(
         app,
         host="0.0.0.0",

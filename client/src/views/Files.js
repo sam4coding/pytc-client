@@ -1,5 +1,5 @@
-import React from 'react';
-import FilesManager from './FilesManager';
+import React from "react";
+import FilesManager from "./FilesManager";
 
 export default function Files() {
   return (

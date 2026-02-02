@@ -1,10 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { Modal, List, Breadcrumb, Button, Spin, message } from 'antd';
-import { FolderFilled, FileOutlined, HomeOutlined, ArrowUpOutlined } from '@ant-design/icons';
-import apiClient from '../services/apiClient';
+import React, { useState, useEffect } from "react";
+import { Modal, List, Breadcrumb, Button, Spin, message } from "antd";
+import {
+  FolderFilled,
+  FileOutlined,
+  HomeOutlined,
+  ArrowUpOutlined,
+} from "@ant-design/icons";
+import apiClient from "../services/apiClient";
 
-const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", selectionType = 'file' }) => {
-  const [currentPath, setCurrentPath] = useState('root');
+const FilePickerModal = ({
+  visible,
+  onCancel,
+  onSelect,
+  title = "Select File",
+  selectionType = "file",
+}) => {
+  const [currentPath, setCurrentPath] = useState("root");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [folders, setFolders] = useState([]); // To track folder structure for breadcrumbs
@@ -18,13 +29,13 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
   const fetchFiles = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/files');
+      const res = await apiClient.get("/files");
       const allFiles = res.data;
 
       // Filter items for current path
-      const currentItems = allFiles.filter(f => {
-        if (currentPath === 'root') {
-          return f.path === 'root' || !f.path;
+      const currentItems = allFiles.filter((f) => {
+        if (currentPath === "root") {
+          return f.path === "root" || !f.path;
         }
         return f.path === currentPath;
       });
@@ -37,8 +48,8 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
 
       setItems(currentItems);
     } catch (error) {
-      console.error('Failed to load files:', error);
-      message.error('Failed to load files');
+      console.error("Failed to load files:", error);
+      message.error("Failed to load files");
     } finally {
       setLoading(false);
     }
@@ -49,14 +60,14 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
       setCurrentPath(String(item.id));
     } else {
       // It's a file
-      if (selectionType === 'file') {
+      if (selectionType === "file") {
         onSelect(item);
       }
     }
   };
 
   const handleNavigateUp = () => {
-    if (currentPath === 'root') return;
+    if (currentPath === "root") return;
     // ... navigation logic ...
   };
 
@@ -72,10 +83,10 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
   const loadAllData = async () => {
     setLoading(true);
     try {
-      const res = await apiClient.get('/files');
+      const res = await apiClient.get("/files");
       setAllData(res.data);
     } catch (error) {
-      message.error('Failed to load files');
+      message.error("Failed to load files");
     } finally {
       setLoading(false);
     }
@@ -83,8 +94,8 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
 
   // Derive items for current view
   useEffect(() => {
-    const filtered = allData.filter(f => {
-      if (currentPath === 'root') return f.path === 'root' || !f.path;
+    const filtered = allData.filter((f) => {
+      if (currentPath === "root") return f.path === "root" || !f.path;
       return String(f.path) === currentPath;
     });
 
@@ -97,9 +108,9 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
   }, [currentPath, allData]);
 
   const getParentPath = () => {
-    if (currentPath === 'root') return null;
-    const currentFolderObj = allData.find(f => String(f.id) === currentPath);
-    return currentFolderObj ? (currentFolderObj.path || 'root') : 'root';
+    if (currentPath === "root") return null;
+    const currentFolderObj = allData.find((f) => String(f.id) === currentPath);
+    return currentFolderObj ? currentFolderObj.path || "root" : "root";
   };
 
   const goUp = () => {
@@ -110,8 +121,8 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
   const getBreadcrumbs = () => {
     const parts = [];
     let curr = currentPath;
-    while (curr && curr !== 'root') {
-      const folder = allData.find(f => String(f.id) === curr);
+    while (curr && curr !== "root") {
+      const folder = allData.find((f) => String(f.id) === curr);
       if (folder) {
         parts.unshift({ id: String(folder.id), name: folder.name });
         curr = folder.path;
@@ -119,21 +130,21 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
         break;
       }
     }
-    parts.unshift({ id: 'root', name: 'Home' });
+    parts.unshift({ id: "root", name: "Home" });
     return parts;
   };
 
   const constructFullPath = (item) => {
-    if (!item) return '';
-    if (item.path === 'root' || !item.path) return item.name;
+    if (!item) return "";
+    if (item.path === "root" || !item.path) return item.name;
 
     const parts = [item.name];
     let currParentId = item.path;
 
     // Safety break to prevent infinite loops
     let attempts = 0;
-    while (currParentId && currParentId !== 'root' && attempts < 100) {
-      const parent = allData.find(f => String(f.id) === currParentId);
+    while (currParentId && currParentId !== "root" && attempts < 100) {
+      const parent = allData.find((f) => String(f.id) === currParentId);
       if (parent) {
         parts.unshift(parent.name);
         currParentId = parent.path;
@@ -142,16 +153,16 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
       }
       attempts++;
     }
-    return parts.join('/');
+    return parts.join("/");
   };
 
   const handleSelectCurrentDirectory = () => {
     // Construct path for current directory
-    if (currentPath === 'root') {
-      onSelect({ name: '', path: 'root', is_folder: true, logical_path: '' }); // Root
+    if (currentPath === "root") {
+      onSelect({ name: "", path: "root", is_folder: true, logical_path: "" }); // Root
       return;
     }
-    const currentFolder = allData.find(f => String(f.id) === currentPath);
+    const currentFolder = allData.find((f) => String(f.id) === currentPath);
     if (currentFolder) {
       const fullPath = constructFullPath(currentFolder);
       onSelect({ ...currentFolder, logical_path: fullPath });
@@ -164,9 +175,17 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
       open={visible}
       onCancel={onCancel}
       footer={
-        selectionType === 'directory' ? (
-          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 16px' }}>
-            <Button onClick={onCancel} style={{ marginRight: 8 }}>Cancel</Button>
+        selectionType === "directory" ? (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              padding: "10px 16px",
+            }}
+          >
+            <Button onClick={onCancel} style={{ marginRight: 8 }}>
+              Cancel
+            </Button>
             <Button type="primary" onClick={handleSelectCurrentDirectory}>
               Select Current Directory
             </Button>
@@ -176,15 +195,22 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
       width={600}
       bodyStyle={{ padding: 0 }}
     >
-      <div style={{ padding: '12px', borderBottom: '1px solid #f0f0f0', display: 'flex', alignItems: 'center' }}>
+      <div
+        style={{
+          padding: "12px",
+          borderBottom: "1px solid #f0f0f0",
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
         <Button
           icon={<ArrowUpOutlined />}
           onClick={goUp}
-          disabled={currentPath === 'root'}
-          style={{ marginRight: '12px' }}
+          disabled={currentPath === "root"}
+          style={{ marginRight: "12px" }}
         />
         <Breadcrumb>
-          {getBreadcrumbs().map(b => (
+          {getBreadcrumbs().map((b) => (
             <Breadcrumb.Item key={b.id}>
               <a onClick={() => setCurrentPath(b.id)}>{b.name}</a>
             </Breadcrumb.Item>
@@ -192,47 +218,73 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
         </Breadcrumb>
       </div>
 
-      <div style={{ height: '400px', overflow: 'auto' }}>
+      <div style={{ height: "400px", overflow: "auto" }}>
         {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "40px",
+            }}
+          >
             <Spin />
           </div>
         ) : (
           <List
             dataSource={items}
-            renderItem={item => (
+            renderItem={(item) => (
               <List.Item
-                style={{ cursor: 'pointer', padding: '8px 16px' }}
+                style={{ cursor: "pointer", padding: "8px 16px" }}
                 className="file-picker-item"
                 onClick={() => {
                   if (item.is_folder) {
                     setCurrentPath(String(item.id));
                   } else {
-                    if (selectionType === 'file') {
+                    if (selectionType === "file") {
                       const fullPath = constructFullPath(item);
                       onSelect({ ...item, logical_path: fullPath });
                     }
                   }
                 }}
                 actions={[
-                  selectionType === 'file' && !item.is_folder && (
-                    <Button type="link" size="small" onClick={(e) => {
-                      e.stopPropagation();
-                      const fullPath = constructFullPath(item);
-                      onSelect({ ...item, logical_path: fullPath });
-                    }}>Select</Button>
+                  selectionType === "file" && !item.is_folder && (
+                    <Button
+                      type="link"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const fullPath = constructFullPath(item);
+                        onSelect({ ...item, logical_path: fullPath });
+                      }}
+                    >
+                      Select
+                    </Button>
                   ),
-                  selectionType === 'directory' && item.is_folder && (
-                    <Button type="link" size="small" onClick={(e) => {
-                      e.stopPropagation();
-                      const fullPath = constructFullPath(item);
-                      onSelect({ ...item, logical_path: fullPath });
-                    }}>Select</Button>
-                  )
+                  selectionType === "directory" && item.is_folder && (
+                    <Button
+                      type="link"
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const fullPath = constructFullPath(item);
+                        onSelect({ ...item, logical_path: fullPath });
+                      }}
+                    >
+                      Select
+                    </Button>
+                  ),
                 ]}
               >
                 <List.Item.Meta
-                  avatar={item.is_folder ? <FolderFilled style={{ color: '#1890ff', fontSize: '20px' }} /> : <FileOutlined style={{ fontSize: '20px' }} />}
+                  avatar={
+                    item.is_folder ? (
+                      <FolderFilled
+                        style={{ color: "#1890ff", fontSize: "20px" }}
+                      />
+                    ) : (
+                      <FileOutlined style={{ fontSize: "20px" }} />
+                    )
+                  }
                   title={item.name}
                   description={item.size ? item.size : null}
                 />

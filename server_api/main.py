@@ -77,7 +77,9 @@ async def neuroglancer(req: Request):
             try:
                 scales = json.loads(scales_raw)
             except json.JSONDecodeError:
-                raise HTTPException(status_code=400, detail="Scales payload is invalid.")
+                raise HTTPException(
+                    status_code=400, detail="Scales payload is invalid."
+                )
 
             image = save_upload_to_tempfile(image_upload)
             cleanup_paths.append(image)
@@ -96,7 +98,9 @@ async def neuroglancer(req: Request):
         print(image, label, scales)
 
         if image is None:
-            raise HTTPException(status_code=400, detail="Image path or file is required.")
+            raise HTTPException(
+                status_code=400, detail="Image path or file is required."
+            )
 
         # neuroglancer setting -- bind to this to make accessible outside of container
         ip = "0.0.0.0"
@@ -111,7 +115,9 @@ async def neuroglancer(req: Request):
             im = readVol(image, image_type="im")
             gt = readVol(label, image_type="im") if label else None
         except Exception as e:
-            raise HTTPException(status_code=400, detail=f"Failed to read image volume: {str(e)}")
+            raise HTTPException(
+                status_code=400, detail=f"Failed to read image volume: {str(e)}"
+            )
 
         def ngLayer(data, res, oo=[0, 0, 0], tt="segmentation"):
             return neuroglancer.LocalVolume(
@@ -143,38 +149,64 @@ async def start_model_training(req: Request):
     print(f"[SERVER_API] Arguments: {req.get('arguments', {})}")
     print(f"[SERVER_API] Log path: {req.get('logPath', 'NOT PROVIDED')}")
     print(f"[SERVER_API] Output path: {req.get('outputPath', 'NOT PROVIDED')}")
-    print(f"[SERVER_API] Training config length: {len(req.get('trainingConfig', '')) if req.get('trainingConfig') else 0} chars")
-    print(f"[SERVER_API] NOTE: TensorBoard will monitor outputPath where PyTorch Connectomics writes logs")
-    
+    print(
+        f"[SERVER_API] Training config length: {len(req.get('trainingConfig', '')) if req.get('trainingConfig') else 0} chars"
+    )
+    print(
+        f"[SERVER_API] NOTE: TensorBoard will monitor outputPath where PyTorch Connectomics writes logs"
+    )
+
     try:
-        target_url = REACT_APP_SERVER_PROTOCOL + "://" + REACT_APP_SERVER_URL + "/start_model_training"
-        print(f"[SERVER_API] Proxying to PyTC server at: {target_url}")
-        
-        response = requests.post(
-            target_url,
-            json=req,
-            timeout=30  # TODO: Add timeout to prevent hanging
+        target_url = (
+            REACT_APP_SERVER_PROTOCOL
+            + "://"
+            + REACT_APP_SERVER_URL
+            + "/start_model_training"
         )
-        
+        print(f"[SERVER_API] Proxying to PyTC server at: {target_url}")
+
+        response = requests.post(
+            target_url, json=req, timeout=30  # TODO: Add timeout to prevent hanging
+        )
+
         print(f"[SERVER_API] PyTC server response status: {response.status_code}")
-        print(f"[SERVER_API] PyTC server response: {response.text[:500]}")  # First 500 chars
+        print(
+            f"[SERVER_API] PyTC server response: {response.text[:500]}"
+        )  # First 500 chars
 
         if response.status_code == 200:
             print("[SERVER_API] ✓ Training request proxied successfully")
-            return {"message": "Model training started successfully", "data": response.json()}
+            return {
+                "message": "Model training started successfully",
+                "data": response.json(),
+            }
         else:
-            print(f"[SERVER_API] ✗ PyTC server returned error status: {response.status_code}")
-            return {"message": f"Failed to start model training: {response.status_code}", "error": response.text}
+            print(
+                f"[SERVER_API] ✗ PyTC server returned error status: {response.status_code}"
+            )
+            return {
+                "message": f"Failed to start model training: {response.status_code}",
+                "error": response.text,
+            }
     except requests.exceptions.ConnectionError as e:
-        print(f"[SERVER_API] ✗ CONNECTION ERROR: Cannot reach PyTC server at {REACT_APP_SERVER_URL}")
+        print(
+            f"[SERVER_API] ✗ CONNECTION ERROR: Cannot reach PyTC server at {REACT_APP_SERVER_URL}"
+        )
         print(f"[SERVER_API] Error details: {e}")
-        return {"message": "Failed to connect to PyTC server. Is server_pytc running?", "error": "ConnectionError"}
+        return {
+            "message": "Failed to connect to PyTC server. Is server_pytc running?",
+            "error": "ConnectionError",
+        }
     except requests.exceptions.Timeout:
         print("[SERVER_API] ✗ TIMEOUT: PyTC server did not respond within 30 seconds")
-        return {"message": "Request timed out. PyTC server may be overloaded.", "error": "Timeout"}
+        return {
+            "message": "Request timed out. PyTC server may be overloaded.",
+            "error": "Timeout",
+        }
     except Exception as e:
         print(f"[SERVER_API] ✗ UNEXPECTED ERROR: {type(e).__name__}: {str(e)}")
         import traceback
+
         print(traceback.format_exc())
         return {"message": f"Failed to start model training: {str(e)}", "error": str(e)}
     finally:
@@ -189,15 +221,24 @@ async def stop_model_training():
             + "://"
             + REACT_APP_SERVER_URL
             + "/stop_model_training",
-            timeout=30
+            timeout=30,
         )
 
         if response.status_code == 200:
-            return {"message": "Model training stopped successfully", "data": response.json()}
+            return {
+                "message": "Model training stopped successfully",
+                "data": response.json(),
+            }
         else:
-            return {"message": f"Failed to stop model training: {response.status_code}", "error": response.text}
+            return {
+                "message": f"Failed to stop model training: {response.status_code}",
+                "error": response.text,
+            }
     except requests.exceptions.ConnectionError:
-        return {"message": "Failed to connect to PyTC server. Is server_pytc running?", "error": "ConnectionError"}
+        return {
+            "message": "Failed to connect to PyTC server. Is server_pytc running?",
+            "error": "ConnectionError",
+        }
     except requests.exceptions.Timeout:
         return {"message": "Request timed out.", "error": "Timeout"}
     except Exception as e:
@@ -213,7 +254,7 @@ async def get_training_status():
             + "://"
             + REACT_APP_SERVER_URL
             + "/training_status",
-            timeout=5
+            timeout=5,
         )
         return response.json()
     except requests.exceptions.ConnectionError:
@@ -232,19 +273,34 @@ async def start_model_inference(req: Request):
             + REACT_APP_SERVER_URL
             + "/start_model_inference",
             json=req,
-            timeout=30
+            timeout=30,
         )
 
         if response.status_code == 200:
-            return {"message": "Model inference started successfully", "data": response.json()}
+            return {
+                "message": "Model inference started successfully",
+                "data": response.json(),
+            }
         else:
-            return {"message": f"Failed to start model inference: {response.status_code}", "error": response.text}
+            return {
+                "message": f"Failed to start model inference: {response.status_code}",
+                "error": response.text,
+            }
     except requests.exceptions.ConnectionError:
-        return {"message": "Failed to connect to PyTC server. Is server_pytc running?", "error": "ConnectionError"}
+        return {
+            "message": "Failed to connect to PyTC server. Is server_pytc running?",
+            "error": "ConnectionError",
+        }
     except requests.exceptions.Timeout:
-        return {"message": "Request timed out. PyTC server may be overloaded.", "error": "Timeout"}
+        return {
+            "message": "Request timed out. PyTC server may be overloaded.",
+            "error": "Timeout",
+        }
     except Exception as e:
-        return {"message": f"Failed to start model inference: {str(e)}", "error": str(e)}
+        return {
+            "message": f"Failed to start model inference: {str(e)}",
+            "error": str(e),
+        }
 
 
 @app.post("/stop_model_inference")
@@ -255,15 +311,24 @@ async def stop_model_inference():
             + "://"
             + REACT_APP_SERVER_URL
             + "/stop_model_inference",
-            timeout=30
+            timeout=30,
         )
 
         if response.status_code == 200:
-            return {"message": "Model inference stopped successfully", "data": response.json()}
+            return {
+                "message": "Model inference stopped successfully",
+                "data": response.json(),
+            }
         else:
-            return {"message": f"Failed to stop model inference: {response.status_code}", "error": response.text}
+            return {
+                "message": f"Failed to stop model inference: {response.status_code}",
+                "error": response.text,
+            }
     except requests.exceptions.ConnectionError:
-        return {"message": "Failed to connect to PyTC server. Is server_pytc running?", "error": "ConnectionError"}
+        return {
+            "message": "Failed to connect to PyTC server. Is server_pytc running?",
+            "error": "ConnectionError",
+        }
     except requests.exceptions.Timeout:
         return {"message": "Request timed out.", "error": "Timeout"}
     except Exception as e:
@@ -303,43 +368,49 @@ async def check_files(req: Request):
         im = await req.json()
         print(f"Received check_files payload: {im}")
         print(im.get("folderPath"), im.get("name"))
-        
+
         # Use os.path.join for safe path construction
         if "filePath" in im and im["filePath"]:
             image_path = im["filePath"]
         else:
             image_path = os.path.join(im["folderPath"], im["name"])
-            
+
         print(f"Checking file at: {image_path}")
-        
+
         try:
             # Use readVol to support all project-standard formats (TIFF, H5, etc.)
             image_array = readVol(image_path, image_type="im")
         except Exception as e:
-             print(f"Failed to read file: {e}")
-             return {"error": f"Failed to open image: {str(e)}"}
+            print(f"Failed to read file: {e}")
+            return {"error": f"Failed to open image: {str(e)}"}
 
         # Heuristic for label detection:
         # 1. Must be integer type
         # 2. Low number of unique values (e.g. < 50) relative to size
         # 3. Or explicit binary (0, 255) or (0, 1)
-        
+
         unique_values = np.unique(image_array)
         num_unique = len(unique_values)
         is_integer = np.issubdtype(image_array.dtype, np.integer)
-        
+
         is_label = False
         if is_integer:
             if num_unique < 50:
                 is_label = True
-            elif np.array_equal(unique_values, np.array([0, 255])) or np.array_equal(unique_values, np.array([0, 1])):
+            elif np.array_equal(unique_values, np.array([0, 255])) or np.array_equal(
+                unique_values, np.array([0, 1])
+            ):
                 is_label = True
 
         if is_label:
-            print(f"The image {im['name']} is likely a label (unique values: {num_unique})")
+            print(
+                f"The image {im['name']} is likely a label (unique values: {num_unique})"
+            )
             label = True
         else:
-            print(f"The image {im['name']} is likely not a label (unique values: {num_unique})")
+            print(
+                f"The image {im['name']} is likely not a label (unique values: {num_unique})"
+            )
             label = False
 
         return {"label": label}
@@ -356,8 +427,8 @@ async def chat_query(req: Request):
             detail = f"{detail}: {_chatbot_error}"
         raise HTTPException(status_code=503, detail=detail)
     body = await req.json()
-    query = body.get('query')
-    response = chain.invoke({'question': query})['answer']
+    query = body.get("query")
+    response = chain.invoke({"question": query})["answer"]
     return {"response": response}
 
 

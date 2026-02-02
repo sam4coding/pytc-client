@@ -1,10 +1,22 @@
-import React, { useMemo } from 'react';
-import { Tree } from 'antd';
-import { FolderFilled, FileOutlined, FolderOpenFilled } from '@ant-design/icons';
+import React, { useMemo } from "react";
+import { Tree } from "antd";
+import {
+  FolderFilled,
+  FileOutlined,
+  FolderOpenFilled,
+} from "@ant-design/icons";
 
 const { DirectoryTree } = Tree;
 
-const FileTreeSidebar = ({ folders, files, currentFolder, onSelect, onDrop, onContextMenu, width = 250 }) => {
+const FileTreeSidebar = ({
+  folders,
+  files,
+  currentFolder,
+  onSelect,
+  onDrop,
+  onContextMenu,
+  width = 250,
+}) => {
   // Convert flat folders list to tree data
   const treeData = useMemo(() => {
     const buildTree = (parentId) => {
@@ -14,18 +26,21 @@ const FileTreeSidebar = ({ folders, files, currentFolder, onSelect, onDrop, onCo
           title: f.title,
           key: `folder-${f.key}`,
           isLeaf: false,
-          icon: ({ expanded }) => (expanded ? <FolderOpenFilled /> : <FolderFilled />),
+          icon: ({ expanded }) =>
+            expanded ? <FolderOpenFilled /> : <FolderFilled />,
           children: buildTree(f.key),
         }));
 
       // Add files to tree
       if (files && files[parentId]) {
-        children.push(...files[parentId].map(f => ({
-          title: f.name,
-          key: `file-${f.key}`,
-          isLeaf: true,
-          icon: <FileOutlined />
-        })));
+        children.push(
+          ...files[parentId].map((f) => ({
+            title: f.name,
+            key: `file-${f.key}`,
+            isLeaf: true,
+            icon: <FileOutlined />,
+          })),
+        );
       }
 
       return children;
@@ -33,18 +48,19 @@ const FileTreeSidebar = ({ folders, files, currentFolder, onSelect, onDrop, onCo
 
     // Start with root folders (parent is 'root' or null)
     const rootNodes = folders
-      .filter((f) => f.key === 'root' || f.parent === null) // Handle 'root' key explicitly if it exists
+      .filter((f) => f.key === "root" || f.parent === null) // Handle 'root' key explicitly if it exists
       .map((f) => ({
         title: f.title,
         key: `folder-${f.key}`,
         isLeaf: false,
-        icon: ({ expanded }) => (expanded ? <FolderOpenFilled /> : <FolderFilled />),
+        icon: ({ expanded }) =>
+          expanded ? <FolderOpenFilled /> : <FolderFilled />,
         children: buildTree(f.key),
       }));
 
     // If no explicit root node in folders, find orphans or treat 'root' as implicit
     if (rootNodes.length === 0) {
-      return buildTree('root');
+      return buildTree("root");
     }
 
     return rootNodes;
@@ -54,8 +70,8 @@ const FileTreeSidebar = ({ folders, files, currentFolder, onSelect, onDrop, onCo
     if (keys.length > 0) {
       const key = keys[0];
       // Only navigate if it's a folder
-      if (key.startsWith('folder-')) {
-        onSelect(key.replace('folder-', ''));
+      if (key.startsWith("folder-")) {
+        onSelect(key.replace("folder-", ""));
       }
     }
   };
@@ -76,14 +92,20 @@ const FileTreeSidebar = ({ folders, files, currentFolder, onSelect, onDrop, onCo
     <div
       style={{
         width: width,
-        borderRight: '1px solid #f0f0f0',
-        height: '100%',
-        overflow: 'auto',
-        backgroundColor: '#fafafa',
-        display: width === 0 ? 'none' : 'block', // Hide if collapsed
+        borderRight: "1px solid #f0f0f0",
+        height: "100%",
+        overflow: "auto",
+        backgroundColor: "#fafafa",
+        display: width === 0 ? "none" : "block", // Hide if collapsed
       }}
     >
-      <div style={{ padding: '10px 16px', fontWeight: 'bold', borderBottom: '1px solid #f0f0f0' }}>
+      <div
+        style={{
+          padding: "10px 16px",
+          fontWeight: "bold",
+          borderBottom: "1px solid #f0f0f0",
+        }}
+      >
         Explorer
       </div>
       <DirectoryTree
@@ -93,7 +115,7 @@ const FileTreeSidebar = ({ folders, files, currentFolder, onSelect, onDrop, onCo
         onSelect={onSelectHandler}
         treeData={treeData}
         expandAction="click"
-        style={{ backgroundColor: 'transparent' }}
+        style={{ backgroundColor: "transparent" }}
         draggable
         blockNode
         onDrop={handleDrop}

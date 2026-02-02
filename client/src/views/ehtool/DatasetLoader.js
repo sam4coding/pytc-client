@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Card, Form, Input, Button, message } from 'antd';
-import { FolderOpenOutlined, UploadOutlined } from '@ant-design/icons';
-import UnifiedFileInput from '../../components/UnifiedFileInput';
+import React, { useState } from "react";
+import { Card, Form, Input, Button, message } from "antd";
+import { FolderOpenOutlined, UploadOutlined } from "@ant-design/icons";
+import UnifiedFileInput from "../../components/UnifiedFileInput";
 
 /**
  * Dataset Loader Component
@@ -11,39 +11,45 @@ function DatasetLoader({ onLoad, loading }) {
   const [form] = Form.useForm();
 
   const handleSubmit = (values) => {
-    const datasetPath = typeof values.datasetPath === 'object' ? values.datasetPath.path : values.datasetPath;
-    const maskPath = typeof values.maskPath === 'object' ? values.maskPath.path : values.maskPath;
+    const datasetPath =
+      typeof values.datasetPath === "object"
+        ? values.datasetPath.path
+        : values.datasetPath;
+    const maskPath =
+      typeof values.maskPath === "object"
+        ? values.maskPath.path
+        : values.maskPath;
 
     if (!datasetPath) {
-      message.error('Please provide a dataset path');
+      message.error("Please provide a dataset path");
       return;
     }
 
-    onLoad(datasetPath, maskPath, values.projectName || 'Untitled Project');
+    onLoad(datasetPath, maskPath, values.projectName || "Untitled Project");
   };
 
   return (
     <Card
       title={
         <span>
-          <FolderOpenOutlined style={{ marginRight: '8px' }} />
+          <FolderOpenOutlined style={{ marginRight: "8px" }} />
           Load Dataset
         </span>
       }
-      style={{ maxWidth: '600px', margin: '0 auto' }}
+      style={{ maxWidth: "600px", margin: "0 auto" }}
     >
       <Form
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
         initialValues={{
-          projectName: 'My Project'
+          projectName: "My Project",
         }}
       >
         <Form.Item
           label="Project Name"
           name="projectName"
-          rules={[{ required: true, message: 'Please enter a project name' }]}
+          rules={[{ required: true, message: "Please enter a project name" }]}
         >
           <Input placeholder="Enter project name" />
         </Form.Item>
@@ -51,7 +57,7 @@ function DatasetLoader({ onLoad, loading }) {
         <Form.Item
           label="Dataset Path"
           name="datasetPath"
-          rules={[{ required: true, message: 'Please enter dataset path' }]}
+          rules={[{ required: true, message: "Please enter dataset path" }]}
           help="Path to image file, directory, or glob pattern (e.g., /path/to/images/*.tif)"
         >
           <UnifiedFileInput placeholder="/path/to/dataset" />
@@ -79,12 +85,14 @@ function DatasetLoader({ onLoad, loading }) {
         </Form.Item>
       </Form>
 
-      <div style={{
-        marginTop: '24px',
-        padding: '16px',
-        background: '#f5f5f5',
-        borderRadius: '4px'
-      }}>
+      <div
+        style={{
+          marginTop: "24px",
+          padding: "16px",
+          background: "#f5f5f5",
+          borderRadius: "4px",
+        }}
+      >
         <h4 style={{ marginTop: 0 }}>Supported Formats:</h4>
         <ul style={{ marginBottom: 0 }}>
           <li>Single TIFF file (2D or 3D stack)</li>
