@@ -5,8 +5,8 @@ const API_BASE = `${process.env.REACT_APP_SERVER_PROTOCOL || "http"}://${process
 
 // Create axios instance without auth headers—app runs as guest by default.
 const apiClient = axios.create({
-	baseURL: API_BASE,
-	withCredentials: true,
+  baseURL: API_BASE,
+  withCredentials: true,
 });
 
 export default apiClient;
