@@ -29,3 +29,8 @@ dependencies = [
     "uvicorn==0.38.0",
     "zarr>=2.18",
 ]
+
+[dependency-groups]
+dev = [
+    "black>=26.1.0",
+]

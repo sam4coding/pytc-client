@@ -5,11 +5,15 @@ from langchain_classic.memory import ConversationBufferMemory
 from langchain_classic.prompts import ChatPromptTemplate
 from server_api.utils.utils import process_path
 
-embeddings = OllamaEmbeddings(model='mistral:latest', base_url='http://cscigpu08.bc.edu:11434')
-faiss_path = process_path('server_api/chatbot/faiss_index')
-vectorstore = FAISS.load_local(faiss_path, embeddings, allow_dangerous_deserialization=True)
+embeddings = OllamaEmbeddings(
+    model="mistral:latest", base_url="http://cscigpu08.bc.edu:11434"
+)
+faiss_path = process_path("server_api/chatbot/faiss_index")
+vectorstore = FAISS.load_local(
+    faiss_path, embeddings, allow_dangerous_deserialization=True
+)
 retriever = vectorstore.as_retriever()
-system_prompt = '''
+system_prompt = """
     You are a helpful AI assistant for the PyTorch Connectomics client, designed to help non-technical users navigate and use the application effectively.
     IMPORTANT GUIDELINES:
     - You are helping end-users who have no programming knowledge
@@ -27,16 +31,17 @@ system_prompt = '''
     Remember: Help users navigate the no-code interface, not understand the underlying technical architecture.
     Here is the related content that will help you answer the user's question:
     {context}
-'''
-prompt = ChatPromptTemplate.from_messages([
-    ('system', system_prompt),
-    ('human', '{question}')
-])
-llm = ChatOllama(model='mistral:latest', base_url='http://cscigpu08.bc.edu:11434', temperature=0)
+"""
+prompt = ChatPromptTemplate.from_messages(
+    [("system", system_prompt), ("human", "{question}")]
+)
+llm = ChatOllama(
+    model="mistral:latest", base_url="http://cscigpu08.bc.edu:11434", temperature=0
+)
 memory = ConversationBufferMemory(return_messages=True, memory_key="chat_history")
 chain = ConversationalRetrievalChain.from_llm(
     llm=llm,
     retriever=retriever,
     memory=memory,
-    combine_docs_chain_kwargs={"prompt": prompt}
+    combine_docs_chain_kwargs={"prompt": prompt},
 )
