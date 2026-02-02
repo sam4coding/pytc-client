@@ -45,14 +45,14 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
   };
 
   const handleItemClick = (item) => {
-    if (item.is_folder) {
-      setCurrentPath(String(item.id));
-    } else {
-      // It's a file
-      if (selectionType === 'file') {
-        onSelect(item);
+      if (item.is_folder) {
+        setCurrentPath(String(item.id));
+      } else {
+        // It's a file
+        if (selectionType === 'file' || selectionType === 'fileOrDirectory') {
+          onSelect(item);
+        }
       }
-    }
   };
 
   const handleNavigateUp = () => {
@@ -164,7 +164,7 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
       open={visible}
       onCancel={onCancel}
       footer={
-        selectionType === 'directory' ? (
+        selectionType === 'directory' || selectionType === 'fileOrDirectory' ? (
           <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '10px 16px' }}>
             <Button onClick={onCancel} style={{ marginRight: 8 }}>Cancel</Button>
             <Button type="primary" onClick={handleSelectCurrentDirectory}>
@@ -215,14 +215,14 @@ const FilePickerModal = ({ visible, onCancel, onSelect, title = "Select File", s
                   }
                 }}
                 actions={[
-                  selectionType === 'file' && !item.is_folder && (
+                  (selectionType === 'file' || selectionType === 'fileOrDirectory') && !item.is_folder && (
                     <Button type="link" size="small" onClick={(e) => {
                       e.stopPropagation();
                       const fullPath = constructFullPath(item);
                       onSelect({ ...item, logical_path: fullPath });
                     }}>Select</Button>
                   ),
-                  selectionType === 'directory' && item.is_folder && (
+                  (selectionType === 'directory' || selectionType === 'fileOrDirectory') && item.is_folder && (
                     <Button type="link" size="small" onClick={(e) => {
                       e.stopPropagation();
                       const fullPath = constructFullPath(item);
