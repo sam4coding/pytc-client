@@ -1,7 +1,7 @@
-import React, { createContext, useState, useCallback, useEffect } from 'react';
+import React, { createContext, useState, useCallback, useEffect } from "react";
 
 export const UserContext = createContext();
-const DEFAULT_USER = { username: 'guest', name: 'Guest' };
+const DEFAULT_USER = { username: "guest", name: "Guest" };
 
 const UserContextWrapper = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(DEFAULT_USER);
@@ -26,7 +26,9 @@ const UserContextWrapper = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ currentUser, setCurrentUser, signIn, signUp, autoSignOut }}>
+    <UserContext.Provider
+      value={{ currentUser, setCurrentUser, signIn, signUp, autoSignOut }}
+    >
       {children}
     </UserContext.Provider>
   );

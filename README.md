@@ -12,6 +12,7 @@ This file only contains instructions on running the application. For a high-leve
 scripts/bootstrap.sh      # macOS / Linux
 scripts\bootstrap.ps1     # Windows
 ```
+
 Re-run this only when you need to update dependencies.
 
 ### 2. Launch the full stack

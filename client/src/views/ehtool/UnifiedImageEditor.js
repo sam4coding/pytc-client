@@ -1,21 +1,32 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Modal, Button, Radio, Space, Divider, message } from 'antd';
-import { SaveOutlined, CheckCircleOutlined, CloseCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import ProofreadingEditor from './ProofreadingEditor';
-import apiClient from '../../services/apiClient';
+import React, { useState, useEffect, useRef } from "react";
+import { Modal, Button, Radio, Space, Divider, message } from "antd";
+import {
+  SaveOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  QuestionCircleOutlined,
+} from "@ant-design/icons";
+import ProofreadingEditor from "./ProofreadingEditor";
+import apiClient from "../../services/apiClient";
 
 /**
  * Unified Image Editor Component
  * Combines mask editing with quality labeling in a full-screen-ish modal
  */
-function UnifiedImageEditor({ visible, layer, sessionId, onClose, onSaveSuccess }) {
-  const [currentLabel, setCurrentLabel] = useState('error');
+function UnifiedImageEditor({
+  visible,
+  layer,
+  sessionId,
+  onClose,
+  onSaveSuccess,
+}) {
+  const [currentLabel, setCurrentLabel] = useState("error");
   const [saving, setSaving] = useState(false);
   const editorRef = useRef(null);
 
   useEffect(() => {
     if (layer) {
-      setCurrentLabel(layer.classification || 'error');
+      setCurrentLabel(layer.classification || "error");
     }
   }, [layer, visible]);
 
@@ -25,25 +36,26 @@ function UnifiedImageEditor({ visible, layer, sessionId, onClose, onSaveSuccess 
       if (!visible) return;
 
       // Prevent shortcuts when typing in input fields
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
+        return;
 
       switch (e.key.toLowerCase()) {
-        case 's':
+        case "s":
           if (e.ctrlKey || e.metaKey) {
             e.preventDefault();
             handleTriggerSave();
           }
           break;
-        case 'c':
-          setCurrentLabel('correct');
+        case "c":
+          setCurrentLabel("correct");
           break;
-        case 'x':
-          setCurrentLabel('incorrect');
+        case "x":
+          setCurrentLabel("incorrect");
           break;
-        case 'u':
-          setCurrentLabel('unsure');
+        case "u":
+          setCurrentLabel("unsure");
           break;
-        case 'escape':
+        case "escape":
           onClose();
           break;
         default:
@@ -51,8 +63,8 @@ function UnifiedImageEditor({ visible, layer, sessionId, onClose, onSaveSuccess 
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [visible, currentLabel]);
 
   if (!layer) return null;
@@ -67,25 +79,25 @@ function UnifiedImageEditor({ visible, layer, sessionId, onClose, onSaveSuccess 
     setSaving(true);
     try {
       // 1. Save Mask
-      await apiClient.post('/eh/detection/mask', {
+      await apiClient.post("/eh/detection/mask", {
         session_id: sessionId,
         layer_index: layer.layer_index,
-        mask_base64: maskBase64
+        mask_base64: maskBase64,
       });
 
       // 2. Save Classification
-      await apiClient.post('/eh/detection/classify', {
+      await apiClient.post("/eh/detection/classify", {
         session_id: sessionId,
         layer_ids: [layer.id],
-        classification: currentLabel
+        classification: currentLabel,
       });
 
-      message.success('Layer updated successfully');
+      message.success("Layer updated successfully");
       if (onSaveSuccess) onSaveSuccess();
       onClose();
     } catch (error) {
-      console.error('Failed to save layer updates:', error);
-      message.error(error.response?.data?.detail || 'Failed to save changes');
+      console.error("Failed to save layer updates:", error);
+      message.error(error.response?.data?.detail || "Failed to save changes");
     } finally {
       setSaving(false);
     }
@@ -98,10 +110,23 @@ function UnifiedImageEditor({ visible, layer, sessionId, onClose, onSaveSuccess 
   return (
     <Modal
       title={
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingRight: '24px' }}>
-          <span>Image Inspection: {layer.layer_name} (Layer {layer.layer_index + 1})</span>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingRight: "24px",
+          }}
+        >
+          <span>
+            Image Inspection: {layer.layer_name} (Layer {layer.layer_index + 1})
+          </span>
           <Space>
-            <Radio.Group value={currentLabel} onChange={handleLabelChange} buttonStyle="solid">
+            <Radio.Group
+              value={currentLabel}
+              onChange={handleLabelChange}
+              buttonStyle="solid"
+            >
               <Radio.Button value="correct">
                 <CheckCircleOutlined /> Correct (C)
               </Radio.Button>
@@ -132,9 +157,13 @@ function UnifiedImageEditor({ visible, layer, sessionId, onClose, onSaveSuccess 
       destroyOnClose
       maskClosable={false}
       keyboard={true}
-      bodyStyle={{ padding: '12px', height: 'calc(100vh - 120px)', overflow: 'hidden' }}
+      bodyStyle={{
+        padding: "12px",
+        height: "calc(100vh - 120px)",
+        overflow: "hidden",
+      }}
     >
-      <div style={{ height: '100%', overflow: 'hidden' }}>
+      <div style={{ height: "100%", overflow: "hidden" }}>
         <ProofreadingEditor
           ref={editorRef}
           imageBase64={layer.image_base64}

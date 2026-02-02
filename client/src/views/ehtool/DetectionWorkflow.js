@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Layout, message, Spin } from 'antd';
-import DatasetLoader from './DatasetLoader';
-import LayerGrid from './LayerGrid';
-import ClassificationPanel from './ClassificationPanel';
-import ProgressTracker from './ProgressTracker';
-import UnifiedImageEditor from './UnifiedImageEditor';
-import apiClient from '../../services/apiClient';
+import React, { useState, useEffect } from "react";
+import { Layout, message, Spin } from "antd";
+import DatasetLoader from "./DatasetLoader";
+import LayerGrid from "./LayerGrid";
+import ClassificationPanel from "./ClassificationPanel";
+import ProgressTracker from "./ProgressTracker";
+import UnifiedImageEditor from "./UnifiedImageEditor";
+import apiClient from "../../services/apiClient";
 
 const { Sider, Content } = Layout;
 
@@ -14,7 +14,7 @@ const { Sider, Content } = Layout;
  * Main interface for error detection workflow
  */
 function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
-  const [projectName, setProjectName] = useState('');
+  const [projectName, setProjectName] = useState("");
   const [totalLayers, setTotalLayers] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [layers, setLayers] = useState([]);
@@ -37,20 +37,25 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
   useEffect(() => {
     const handleKeyPress = (e) => {
       // Don't trigger shortcuts when typing in input fields or when modal is open
-      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || editingLayer) return;
+      if (
+        e.target.tagName === "INPUT" ||
+        e.target.tagName === "TEXTAREA" ||
+        editingLayer
+      )
+        return;
       if (!sessionId) return;
 
       switch (e.key.toLowerCase()) {
-        case 'c':
-          if (selectedLayers.length > 0) handleClassify('correct');
+        case "c":
+          if (selectedLayers.length > 0) handleClassify("correct");
           break;
-        case 'x':
-          if (selectedLayers.length > 0) handleClassify('incorrect');
+        case "x":
+          if (selectedLayers.length > 0) handleClassify("incorrect");
           break;
-        case 'u':
-          if (selectedLayers.length > 0) handleClassify('unsure');
+        case "u":
+          if (selectedLayers.length > 0) handleClassify("unsure");
           break;
-        case 'a':
+        case "a":
           if (e.ctrlKey) {
             e.preventDefault();
             selectAllLayers();
@@ -61,27 +66,29 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
       }
     };
 
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
+    return () => window.removeEventListener("keydown", handleKeyPress);
   }, [sessionId, selectedLayers, layers, editingLayer]);
 
   const handleDatasetLoad = async (datasetPath, maskPath, projectName) => {
     setLoading(true);
     try {
-      const response = await apiClient.post('/eh/detection/load', {
+      const response = await apiClient.post("/eh/detection/load", {
         dataset_path: datasetPath,
         mask_path: maskPath || null,
-        project_name: projectName
+        project_name: projectName,
       });
 
       setSessionId(response.data.session_id);
       setProjectName(response.data.project_name);
       setTotalLayers(response.data.total_layers);
       setCurrentPage(1);
-      message.success(`Loaded ${response.data.total_layers} layers successfully`);
+      message.success(
+        `Loaded ${response.data.total_layers} layers successfully`,
+      );
     } catch (error) {
-      console.error('Failed to load dataset:', error);
-      message.error(error.response?.data?.detail || 'Failed to load dataset');
+      console.error("Failed to load dataset:", error);
+      message.error(error.response?.data?.detail || "Failed to load dataset");
     } finally {
       setLoading(false);
     }
@@ -90,19 +97,19 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
   const loadLayers = async () => {
     setLoading(true);
     try {
-      const response = await apiClient.get('/eh/detection/layers', {
+      const response = await apiClient.get("/eh/detection/layers", {
         params: {
           session_id: sessionId,
           page: currentPage,
           page_size: pageSize,
-          include_images: true
-        }
+          include_images: true,
+        },
       });
 
       setLayers(response.data.layers);
     } catch (error) {
-      console.error('Failed to load layers:', error);
-      message.error('Failed to load layers');
+      console.error("Failed to load layers:", error);
+      message.error("Failed to load layers");
     } finally {
       setLoading(false);
     }
@@ -110,44 +117,48 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
 
   const loadStats = async () => {
     try {
-      const response = await apiClient.get('/eh/detection/stats', {
-        params: { session_id: sessionId }
+      const response = await apiClient.get("/eh/detection/stats", {
+        params: { session_id: sessionId },
       });
 
       setStats(response.data);
     } catch (error) {
-      console.error('Failed to load stats:', error);
+      console.error("Failed to load stats:", error);
     }
   };
 
   const handleClassify = async (classification) => {
     if (selectedLayers.length === 0) {
-      message.warning('Please select at least one layer');
+      message.warning("Please select at least one layer");
       return;
     }
 
     try {
-      await apiClient.post('/eh/detection/classify', {
+      await apiClient.post("/eh/detection/classify", {
         session_id: sessionId,
         layer_ids: selectedLayers,
-        classification: classification
+        classification: classification,
       });
 
       // Update local layer states
-      setLayers(layers.map(layer =>
-        selectedLayers.includes(layer.id)
-          ? { ...layer, classification }
-          : layer
-      ));
+      setLayers(
+        layers.map((layer) =>
+          selectedLayers.includes(layer.id)
+            ? { ...layer, classification }
+            : layer,
+        ),
+      );
 
       // Reload stats
       await loadStats();
 
-      message.success(`Classified ${selectedLayers.length} layer(s) as '${classification}'`);
+      message.success(
+        `Classified ${selectedLayers.length} layer(s) as '${classification}'`,
+      );
       setSelectedLayers([]);
     } catch (error) {
-      console.error('Failed to classify layers:', error);
-      message.error('Failed to classify layers');
+      console.error("Failed to classify layers:", error);
+      message.error("Failed to classify layers");
     }
   };
 
@@ -158,7 +169,6 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
     // For simplicity, let's say normal click opens the editor, and we use the Badge/Checkbox for selection?
     // Actually, the user said "On clicking any, open a high-resolution...".
     // So click = Inspection.
-
     // We'll pass both to LayerGrid and let it decide.
   };
 
@@ -167,7 +177,7 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
   };
 
   const selectAllLayers = () => {
-    const allLayerIds = layers.map(l => l.id);
+    const allLayerIds = layers.map((l) => l.id);
     setSelectedLayers(allLayerIds);
   };
 
@@ -183,7 +193,7 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
   // Show dataset loader if no session
   if (!sessionId) {
     return (
-      <div style={{ padding: '24px' }}>
+      <div style={{ padding: "24px" }}>
         <DatasetLoader onLoad={handleDatasetLoad} loading={loading} />
       </div>
     );
@@ -191,15 +201,15 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
 
   // Show main detection interface
   return (
-    <Layout style={{ height: 'calc(100vh - 200px)', background: '#fff' }}>
+    <Layout style={{ height: "calc(100vh - 200px)", background: "#fff" }}>
       {/* Left Panel: Progress Tracker */}
       <Sider
         width="20%"
         theme="light"
         style={{
-          borderRight: '1px solid #f0f0f0',
-          minWidth: '250px',
-          maxWidth: '350px'
+          borderRight: "1px solid #f0f0f0",
+          minWidth: "250px",
+          maxWidth: "350px",
         }}
       >
         <ProgressTracker
@@ -212,25 +222,33 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
           }}
           onStartProofreading={() => {
             // Find first incorrect layer and open it
-            const firstIncorrect = layers.find(l => l.classification === 'incorrect');
+            const firstIncorrect = layers.find(
+              (l) => l.classification === "incorrect",
+            );
             if (firstIncorrect) {
               setEditingLayer(firstIncorrect);
             } else {
-              message.info('No incorrect layers visible on this page. Try scrolling or filtering.');
+              message.info(
+                "No incorrect layers visible on this page. Try scrolling or filtering.",
+              );
             }
           }}
         />
       </Sider>
 
       {/* Center: Layer Grid */}
-      <Content style={{ padding: '16px', background: '#fafafa', overflow: 'auto' }}>
+      <Content
+        style={{ padding: "16px", background: "#fafafa", overflow: "auto" }}
+      >
         {loading ? (
-          <div style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100%'
-          }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              height: "100%",
+            }}
+          >
             <Spin size="large" tip="Loading layers..." />
           </div>
         ) : (
@@ -238,10 +256,10 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
             layers={layers}
             selectedLayers={selectedLayers}
             onLayerSelect={(layerId) => {
-              setSelectedLayers(prev =>
+              setSelectedLayers((prev) =>
                 prev.includes(layerId)
-                  ? prev.filter(id => id !== layerId)
-                  : [...prev, layerId]
+                  ? prev.filter((id) => id !== layerId)
+                  : [...prev, layerId],
               );
             }}
             onLayerClick={(layer) => setEditingLayer(layer)}
@@ -257,9 +275,9 @@ function DetectionWorkflow({ sessionId, setSessionId, refreshTrigger }) {
         width="20%"
         theme="light"
         style={{
-          borderLeft: '1px solid #f0f0f0',
-          minWidth: '250px',
-          maxWidth: '350px'
+          borderLeft: "1px solid #f0f0f0",
+          minWidth: "250px",
+          maxWidth: "350px",
         }}
       >
         <ClassificationPanel
