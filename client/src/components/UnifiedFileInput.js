@@ -14,7 +14,7 @@ import FilePickerModal from "./FilePickerModal";
  * - Drag and drop (external files)
  * - File picker (Local Machine or Server Storage)
  *
- * @param {string} selectionType - 'file' or 'directory' (default: 'file')
+ * @param {string} selectionType - 'file', 'directory', or 'fileOrDirectory' (default: 'file')
  * @param {object|string} value - The current value. Can be a string (path) or object { path, display }
  */
 const UnifiedFileInput = ({
@@ -39,7 +39,11 @@ const UnifiedFileInput = ({
     try {
       const { ipcRenderer } = window.require("electron");
       const properties =
-        selectionType === "directory" ? ["openDirectory"] : ["openFile"];
+        selectionType === "directory"
+          ? ["openDirectory"]
+          : selectionType === "fileOrDirectory"
+            ? ["openFile", "openDirectory"]
+            : ["openFile"];
 
       const filePath = await ipcRenderer.invoke("dialog:openFile", {
         properties,

@@ -60,7 +60,7 @@ const FilePickerModal = ({
       setCurrentPath(String(item.id));
     } else {
       // It's a file
-      if (selectionType === "file") {
+      if (selectionType === "file" || selectionType === "fileOrDirectory") {
         onSelect(item);
       }
     }
@@ -175,7 +175,7 @@ const FilePickerModal = ({
       open={visible}
       onCancel={onCancel}
       footer={
-        selectionType === "directory" ? (
+        selectionType === "directory" || selectionType === "fileOrDirectory" ? (
           <div
             style={{
               display: "flex",
@@ -247,32 +247,36 @@ const FilePickerModal = ({
                   }
                 }}
                 actions={[
-                  selectionType === "file" && !item.is_folder && (
-                    <Button
-                      type="link"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const fullPath = constructFullPath(item);
-                        onSelect({ ...item, logical_path: fullPath });
-                      }}
-                    >
-                      Select
-                    </Button>
-                  ),
-                  selectionType === "directory" && item.is_folder && (
-                    <Button
-                      type="link"
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        const fullPath = constructFullPath(item);
-                        onSelect({ ...item, logical_path: fullPath });
-                      }}
-                    >
-                      Select
-                    </Button>
-                  ),
+                  (selectionType === "file" ||
+                    selectionType === "fileOrDirectory") &&
+                    !item.is_folder && (
+                      <Button
+                        type="link"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const fullPath = constructFullPath(item);
+                          onSelect({ ...item, logical_path: fullPath });
+                        }}
+                      >
+                        Select
+                      </Button>
+                    ),
+                  (selectionType === "directory" ||
+                    selectionType === "fileOrDirectory") &&
+                    item.is_folder && (
+                      <Button
+                        type="link"
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          const fullPath = constructFullPath(item);
+                          onSelect({ ...item, logical_path: fullPath });
+                        }}
+                      >
+                        Select
+                      </Button>
+                    ),
                 ]}
               >
                 <List.Item.Meta

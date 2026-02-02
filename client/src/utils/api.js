@@ -71,8 +71,11 @@ export async function checkFile(file) {
 
 function handleError(error) {
   if (error.response) {
+    const detail = error.response.data?.detail;
+    const detailMessage =
+      typeof detail === "string" ? detail : detail?.data;
     throw new Error(
-      `${error.response.status}: ${error.response.data?.detail?.data || error.response.statusText}`,
+      `${error.response.status}: ${detailMessage || error.response.statusText}`,
     );
   }
   throw error;
@@ -351,7 +354,7 @@ export async function stopModelInference() {
 export async function queryChatBot(query) {
   try {
     const res = await axios.post(
-      `${process.env.REACT_APP_API_PROTOCOL}://${process.env.REACT_APP_API_URL}/chat/query`,
+      `${API_PROTOCOL}://${API_URL}/chat/query`,
       { query },
     );
     return res.data?.response;
@@ -363,7 +366,7 @@ export async function queryChatBot(query) {
 export async function clearChat() {
   try {
     await axios.post(
-      `${process.env.REACT_APP_API_PROTOCOL}://${process.env.REACT_APP_API_URL}/chat/clear`,
+      `${API_PROTOCOL}://${API_URL}/chat/clear`,
     );
   } catch (error) {
     handleError(error);

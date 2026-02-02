@@ -62,7 +62,7 @@ function Chatbot({ onClose }) {
         ...prev,
         {
           id: prev.length + 1,
-          text: "Error contacting chatbot.",
+          text: e.message || "Error contacting chatbot.",
           isUser: false,
         },
       ]);

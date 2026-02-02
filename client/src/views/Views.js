@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Layout, Menu, message } from "antd";
+import { Layout, Menu, message, Button, Drawer } from "antd";
 import {
   FolderOpenOutlined,
   DesktopOutlined,
@@ -9,7 +9,7 @@ import {
   DashboardOutlined,
   BugOutlined,
   ReadOutlined,
-  ApartmentOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import FilesManager from "./FilesManager";
 import Visualization from "./Visualization";
@@ -19,6 +19,7 @@ import Monitoring from "./Monitoring";
 import ProofReading from "./ProofReading";
 import WormErrorHandling from "./WormErrorHandling";
 import WorkflowSelector from "../components/WorkflowSelector";
+import Chatbot from "../components/Chatbot";
 import apiClient from "../services/apiClient";
 
 const { Content } = Layout;
@@ -32,6 +33,9 @@ function Views() {
   const [visitedTabs, setVisitedTabs] = useState(new Set(["files"]));
   const [workflowModalVisible, setWorkflowModalVisible] = useState(false);
   const [isManualChange, setIsManualChange] = useState(false); // Flag for "Change Startup Mode"
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [apiReady, setApiReady] = useState(false);
+  const [hasShownApiWarning, setHasShownApiWarning] = useState(false);
 
   // Lifted state from Workspace
   const [viewers, setViewers] = useState([]);
@@ -86,66 +90,85 @@ function Views() {
     }
   };
 
-  // Load Preference on Mount
+  const checkPreference = async (isMounted) => {
+    try {
+      const res = await apiClient.get('/files')
+      const fileList = res.data || []
+
+      // Find saved preference file
+      const prefFile = fileList.find(f => f.name === PREF_FILE_NAME && !f.is_folder)
+
+      if (prefFile && prefFile.physical_path) {
+        try {
+          let pathForUrl = prefFile.physical_path.replace(/\\/g, '/')
+          if (pathForUrl.includes('uploads/')) {
+            const parts = pathForUrl.split('uploads/')
+            if (parts.length > 1) {
+              pathForUrl = 'uploads/' + parts[parts.length - 1]
+            }
+          }
+          const fileUrl = `${apiClient.defaults.baseURL || 'http://localhost:4242'}/${pathForUrl}`
+
+          const contentRes = await fetch(fileUrl)
+          if (contentRes.ok) {
+            const data = await contentRes.json()
+            if (data) {
+              const modes = data.modes || data.mode
+              if (modes) {
+                applyModes(modes)
+                return
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Error reading pref file content', err)
+        }
+      }
+
+      // If no file found or error reading it, show selector (Initial Launch)
+      if (isMounted) {
+        setWorkflowModalVisible(true)
+        setIsManualChange(false)
+      }
+
+    } catch (err) {
+      if (isMounted) {
+        setWorkflowModalVisible(true)
+        setIsManualChange(false)
+      }
+    }
+  }
+
+  // Wait for API readiness before loading preferences
   useEffect(() => {
     let isMounted = true;
+    let pollId;
 
-    const checkPreference = async () => {
+    const pollApi = async () => {
       try {
-        const res = await apiClient.get("/files");
-        const fileList = res.data || [];
-
-        // Find saved preference file
-        const prefFile = fileList.find(
-          (f) => f.name === PREF_FILE_NAME && !f.is_folder,
-        );
-
-        if (prefFile && prefFile.physical_path) {
-          try {
-            let pathForUrl = prefFile.physical_path.replace(/\\/g, "/");
-            if (pathForUrl.includes("uploads/")) {
-              const parts = pathForUrl.split("uploads/");
-              if (parts.length > 1) {
-                pathForUrl = "uploads/" + parts[parts.length - 1];
-              }
-            }
-            const fileUrl = `${apiClient.defaults.baseURL || "http://localhost:4242"}/${pathForUrl}`;
-
-            const contentRes = await fetch(fileUrl);
-            if (contentRes.ok) {
-              const data = await contentRes.json();
-              if (data) {
-                const modes = data.modes || data.mode;
-                if (modes) {
-                  applyModes(modes);
-                  return;
-                }
-              }
-            }
-          } catch (err) {
-            console.error("Error reading pref file content", err);
-          }
-        }
-
-        // If no file found or error reading it, show selector (Initial Launch)
-        if (isMounted) {
-          setWorkflowModalVisible(true);
-          setIsManualChange(false);
-        }
+        await apiClient.get("/health");
+        if (!isMounted) return;
+        setApiReady(true);
+        checkPreference(isMounted);
+        if (pollId) clearInterval(pollId);
       } catch (err) {
-        if (isMounted) {
-          setWorkflowModalVisible(true);
-          setIsManualChange(false);
+        if (!isMounted) return;
+        setApiReady(false);
+        if (!hasShownApiWarning) {
+          setHasShownApiWarning(true);
+          message.warning("API server is not ready yet. Retrying...");
         }
       }
     };
 
-    checkPreference();
+    pollApi();
+    pollId = setInterval(pollApi, 2000);
 
     return () => {
       isMounted = false;
+      if (pollId) clearInterval(pollId);
     };
-  }, []);
+  }, [hasShownApiWarning]);
 
   const handleWorkflowSelect = async (modes, remember) => {
     setWorkflowModalVisible(false);
@@ -157,6 +180,11 @@ function Views() {
 
     // Persistence Logic
     try {
+      if (!apiReady) {
+        message.warning('API server is not ready. Preference was not saved.')
+        setIsManualChange(false)
+        return
+      }
       // 1. Always delete existing to avoid staleness or duplicates
       const res = await apiClient.get("/files");
       const existing = (res.data || []).filter(
@@ -270,7 +298,7 @@ function Views() {
           display: "flex",
           alignItems: "center",
           background: "#fff",
-          paddingRight: 24,
+          paddingRight: 16,
           borderBottom: "1px solid #f0f0f0",
         }}
       >
@@ -285,6 +313,12 @@ function Views() {
             flex: 1,
             borderBottom: "none",
           }}
+        />
+        <Button
+          type="primary"
+          shape="circle"
+          icon={<MessageOutlined />}
+          onClick={() => setIsChatOpen(true)}
         />
       </div>
       <Content
@@ -311,6 +345,18 @@ function Views() {
         {renderTabContent("synanno", <ProofReading />)}
         {renderTabContent("worm-error-handling", <WormErrorHandling />)}
       </Content>
+      <Drawer
+        placement="right"
+        open={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        width={380}
+        mask={false}
+        closable={false}
+        destroyOnClose
+        styles={{ header: { display: 'none' }, body: { padding: 0 } }}
+      >
+        <Chatbot onClose={() => setIsChatOpen(false)} />
+      </Drawer>
     </Layout>
   );
 }

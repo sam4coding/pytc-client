@@ -69,6 +69,8 @@ function FilesManager() {
   const [previewFile, setPreviewFile] = useState(null);
   const [propertiesData, setPropertiesData] = useState(null);
   const [selectionBox, setSelectionBox] = useState(null);
+  const [serverUnavailable, setServerUnavailable] = useState(false);
+  const [hasShownServerWarning, setHasShownServerWarning] = useState(false);
   const containerRef = useRef(null);
   const itemRefs = useRef({});
   const isDragSelecting = useRef(false);
@@ -123,11 +125,20 @@ function FilesManager() {
           const { folders: flds, files: fls } = transformFiles(res.data);
           setFolders(flds);
           setFiles(fls);
+          setServerUnavailable(false);
         }
       } catch (err) {
+        const isNetworkError = !err.response;
+        if (isMounted && isNetworkError) {
+          setServerUnavailable(true);
+          if (!hasShownServerWarning) {
+            setHasShownServerWarning(true);
+            message.warning('API server is not available yet. Retrying...');
+          }
+        }
         // Only show error if component is mounted and it's not an auth error
         // (auth errors are already handled by the interceptor)
-        if (isMounted && !err.isAuthError) {
+        if (isMounted && !err.isAuthError && !isNetworkError) {
           console.error("Failed to load files", err);
           message.error("Could not load files");
         }
@@ -135,12 +146,18 @@ function FilesManager() {
     };
 
     fetchFiles();
+    const retryId = setInterval(() => {
+      if (isMounted && serverUnavailable) {
+        fetchFiles();
+      }
+    }, 2000);
 
     // Cleanup function to prevent state updates after unmount
     return () => {
       isMounted = false;
+      clearInterval(retryId);
     };
-  }, []); // Empty dependency array - only run once on mount
+  }, [serverUnavailable, hasShownServerWarning]); // Retry when server unavailable
 
   const getCurrentFolderObj = () =>
     folders.find((f) => f.key === currentFolder);
@@ -961,7 +978,28 @@ function FilesManager() {
   };
 
   return (
-    <div style={{ height: "100%", display: "flex", flexDirection: "row" }}>
+    <div
+      style={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "row",
+        position: "relative",
+      }}
+    >
+      {serverUnavailable && (
+        <div style={{ position: "absolute", top: 80, left: 24, right: 24, zIndex: 10 }}>
+          <div
+            style={{
+              padding: 12,
+              background: "#fffbe6",
+              border: "1px solid #ffe58f",
+              borderRadius: 8,
+            }}
+          >
+            API server is not ready yet. File list will load automatically when it comes online.
+          </div>
+        </div>
+      )}
       {isSidebarVisible && (
         <>
           <FileTreeSidebar
