@@ -45,7 +45,7 @@ function Chatbot({ onClose }) {
       const botMessage = { id: userMessage.id + 1, text: responseText || 'Sorry, I could not generate a response.', isUser: false }
       setMessages(prev => [...prev, botMessage])
     } catch (e) {
-      setMessages(prev => [...prev, { id: prev.length + 1, text: 'Error contacting chatbot.', isUser: false }])
+      setMessages(prev => [...prev, { id: prev.length + 1, text: e.message || 'Error contacting chatbot.', isUser: false }])
     } finally {
       setIsSending(false)
     }

@@ -4,6 +4,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLIENT_DIR="${ROOT_DIR}/client"
+DEFAULT_OLLAMA_BASE_URL="http://localhost:11434"
+DEFAULT_OLLAMA_MODEL="llama3.1:8b"
 
 if ! command -v uv >/dev/null 2>&1; then
     echo "uv is required. Run scripts/bootstrap.sh first." >&2
@@ -40,6 +42,8 @@ uv run --directory "${ROOT_DIR}" python server_api/scripts/serve_data.py &
 DATA_SERVER_PID=$!
 
 echo "Starting API server (port 4242)..."
+OLLAMA_BASE_URL="${OLLAMA_BASE_URL:-${DEFAULT_OLLAMA_BASE_URL}}" \
+OLLAMA_MODEL="${OLLAMA_MODEL:-${DEFAULT_OLLAMA_MODEL}}" \
 PYTHONDONTWRITEBYTECODE=1 uv run --directory "${ROOT_DIR}" python -m server_api.main &
 API_PID=$!
 

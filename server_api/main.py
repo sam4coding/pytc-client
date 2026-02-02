@@ -18,13 +18,32 @@ from fastapi.staticfiles import StaticFiles
 import os
 
 # Chatbot is optional; keep the server running if dependencies or model endpoints
-# are unavailable.
+# are unavailable. We initialize lazily on demand.
 try:
-    from chatbot.chatbot import chain, memory
+    from server_api.chatbot.chatbot import build_chain
 except Exception as exc:  # pragma: no cover - exercised indirectly via endpoints
-    chain = None
-    memory = None
+    build_chain = None
     _chatbot_error = exc
+
+chain = None
+memory = None
+
+
+def _ensure_chatbot():
+    global chain, memory, _chatbot_error
+    if chain is not None and memory is not None:
+        return True
+    if build_chain is None:
+        return False
+    try:
+        chain, memory = build_chain()
+        _chatbot_error = None
+        return True
+    except Exception as exc:  # pragma: no cover - runtime config issue
+        chain = None
+        memory = None
+        _chatbot_error = exc
+        return False
 
 REACT_APP_SERVER_PROTOCOL = "http"
 REACT_APP_SERVER_URL = "localhost:4243"
@@ -48,6 +67,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
 
 
 def save_upload_to_tempfile(upload: UploadFile) -> pathlib.Path:
@@ -355,7 +379,7 @@ async def check_files(req: Request):
 # Chatbot endpoints
 @app.post("/chat/query")
 async def chat_query(req: Request):
-    if chain is None:
+    if not _ensure_chatbot():
         detail = "Chatbot is not configured"
         if "_chatbot_error" in globals():
             detail = f"{detail}: {_chatbot_error}"
@@ -368,13 +392,22 @@ async def chat_query(req: Request):
 
 @app.post("/chat/clear")
 async def clear_chat():
-    if memory is None:
+    if not _ensure_chatbot():
         detail = "Chatbot is not configured"
         if "_chatbot_error" in globals():
             detail = f"{detail}: {_chatbot_error}"
         raise HTTPException(status_code=503, detail=detail)
     memory.clear()
     return {"message": "Chat history cleared"}
+
+
+@app.get("/chat/status")
+async def chat_status():
+    configured = _ensure_chatbot()
+    detail = None
+    if not configured and "_chatbot_error" in globals():
+        detail = str(_chatbot_error)
+    return {"configured": configured, "error": detail}
 
 
 def run():

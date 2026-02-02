@@ -1,3 +1,4 @@
+import os
 from langchain_ollama import OllamaEmbeddings, ChatOllama
 from langchain_community.vectorstores import FAISS
 from langchain_classic.chains import ConversationalRetrievalChain
@@ -5,11 +6,8 @@ from langchain_classic.memory import ConversationBufferMemory
 from langchain_classic.prompts import ChatPromptTemplate
 from server_api.utils.utils import process_path
 
-embeddings = OllamaEmbeddings(model='mistral:latest', base_url='http://cscigpu08.bc.edu:11434')
-faiss_path = process_path('server_api/chatbot/faiss_index')
-vectorstore = FAISS.load_local(faiss_path, embeddings, allow_dangerous_deserialization=True)
-retriever = vectorstore.as_retriever()
-system_prompt = '''
+
+SYSTEM_PROMPT = '''
     You are a helpful AI assistant for the PyTorch Connectomics client, designed to help non-technical users navigate and use the application effectively.
     IMPORTANT GUIDELINES:
     - You are helping end-users who have no programming knowledge
@@ -28,15 +26,26 @@ system_prompt = '''
     Here is the related content that will help you answer the user's question:
     {context}
 '''
-prompt = ChatPromptTemplate.from_messages([
-    ('system', system_prompt),
-    ('human', '{question}')
-])
-llm = ChatOllama(model='mistral:latest', base_url='http://cscigpu08.bc.edu:11434', temperature=0)
-memory = ConversationBufferMemory(return_messages=True, memory_key="chat_history")
-chain = ConversationalRetrievalChain.from_llm(
-    llm=llm,
-    retriever=retriever,
-    memory=memory,
-    combine_docs_chain_kwargs={"prompt": prompt}
-)
+
+
+def build_chain():
+    ollama_base_url = os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434')
+    ollama_model = os.getenv('OLLAMA_MODEL', 'mistral:latest')
+
+    embeddings = OllamaEmbeddings(model=ollama_model, base_url=ollama_base_url)
+    faiss_path = process_path('server_api/chatbot/faiss_index')
+    vectorstore = FAISS.load_local(faiss_path, embeddings, allow_dangerous_deserialization=True)
+    retriever = vectorstore.as_retriever()
+    prompt = ChatPromptTemplate.from_messages([
+        ('system', SYSTEM_PROMPT),
+        ('human', '{question}')
+    ])
+    llm = ChatOllama(model=ollama_model, base_url=ollama_base_url, temperature=0)
+    memory = ConversationBufferMemory(return_messages=True, memory_key="chat_history")
+    chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=retriever,
+        memory=memory,
+        combine_docs_chain_kwargs={"prompt": prompt}
+    )
+    return chain, memory
