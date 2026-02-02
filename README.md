@@ -6,23 +6,30 @@ This file only contains instructions on running the application. For a high-leve
 
 ## Set-up
 
-### 1. Bootstrap
+Install `uv` and `node`:
+
+```
+brew install uv node                    # macOS / Linux
+winget install Astral.uv OpenJS.NodeJS  # Windows
+```
+
+Install dependencies:
 
 ```
 scripts/bootstrap.sh      # macOS / Linux
 scripts\bootstrap.ps1     # Windows
 ```
 
-Re-run this only when you need to update dependencies.
+Re-run the relevant bootstrap script when you need to update dependencies.
 
-### 2. Launch the full stack
+## Run the app
 
 ```
 scripts/start.sh          # macOS / Linux
 scripts\start.ps1         # Windows
 ```
 
-## Before pushing
+## Before pushing changes
 
 Format most code with `prettier`:
 
