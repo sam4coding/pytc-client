@@ -1,5 +1,6 @@
 import json
 import pathlib
+import re
 import shutil
 import tempfile
 from typing import List, Optional
@@ -45,6 +46,8 @@ def _ensure_chatbot():
         _chatbot_error = exc
         return False
 
+
+
 REACT_APP_SERVER_PROTOCOL = "http"
 REACT_APP_SERVER_URL = "localhost:4243"
 
@@ -72,6 +75,71 @@ app.add_middleware(
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+BASE_DIR = pathlib.Path(__file__).resolve().parent.parent
+PYTC_CONFIG_ROOT = BASE_DIR / "pytorch_connectomics" / "configs"
+PYTC_BUILD_FILE = (
+    BASE_DIR / "pytorch_connectomics" / "connectomics" / "model" / "build.py"
+)
+
+
+def _list_pytc_configs() -> List[str]:
+    if not PYTC_CONFIG_ROOT.exists():
+        return []
+    return sorted(
+        [
+            str(path.relative_to(PYTC_CONFIG_ROOT)).replace("\\", "/")
+            for path in PYTC_CONFIG_ROOT.rglob("*.yaml")
+        ]
+    )
+
+
+def _read_model_architectures() -> List[str]:
+    if not PYTC_BUILD_FILE.exists():
+        return []
+    text = PYTC_BUILD_FILE.read_text(encoding="utf-8", errors="ignore")
+    match = re.search(r"MODEL_MAP\s*=\s*{(.*?)}", text, re.S)
+    if not match:
+        return []
+    block = match.group(1)
+    keys = re.findall(r"'([^']+)'\s*:", block)
+    return sorted(set(keys))
+
+
+@app.get("/pytc/configs")
+def list_pytc_configs():
+    configs = _list_pytc_configs()
+    if not configs:
+        raise HTTPException(status_code=404, detail="No PyTC config presets found.")
+    return {"configs": configs}
+
+
+@app.get("/pytc/config")
+def get_pytc_config(path: str):
+    if not path:
+        raise HTTPException(status_code=400, detail="Config path is required.")
+    if ".." in path or path.startswith("/"):
+        raise HTTPException(status_code=400, detail="Invalid config path.")
+    requested = (PYTC_CONFIG_ROOT / path).resolve()
+    if not str(requested).startswith(str(PYTC_CONFIG_ROOT.resolve())):
+        raise HTTPException(status_code=400, detail="Invalid config path.")
+    if not requested.is_file():
+        raise HTTPException(status_code=404, detail="Config not found.")
+    if requested.suffix.lower() != ".yaml":
+        raise HTTPException(status_code=400, detail="Config must be a YAML file.")
+    content = requested.read_text(encoding="utf-8", errors="ignore")
+    return {"path": path, "content": content}
+
+
+@app.get("/pytc/architectures")
+def list_pytc_architectures():
+    architectures = _read_model_architectures()
+    if not architectures:
+        raise HTTPException(
+            status_code=404, detail="No model architectures found."
+        )
+    return {"architectures": architectures}
 
 
 def save_upload_to_tempfile(upload: UploadFile) -> pathlib.Path:

@@ -187,6 +187,20 @@ export async function getTrainingStatus() {
   }
 }
 
+export async function getConfigPresets() {
+  return makeApiRequest("pytc/configs", "get");
+}
+
+export async function getConfigPresetContent(path) {
+  const url = `pytc/config?path=${encodeURIComponent(path)}`;
+  return makeApiRequest(url, "get");
+}
+
+export async function getModelArchitectures() {
+  return makeApiRequest("pytc/architectures", "get");
+}
+
+
 // export async function startTensorboard() {
 //   try {
 //     const res = await axios.get(

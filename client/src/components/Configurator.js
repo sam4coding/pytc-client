@@ -46,7 +46,7 @@ function Configurator(props) {
   const { token } = theme.useToken();
 
   const contentStyle = {
-    height: "260px",
+    minHeight: "260px",
     textAlign: "left",
     color: token.colorTextTertiary,
     backgroundColor: token.colorFillAlter,
