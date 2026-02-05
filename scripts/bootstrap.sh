@@ -15,11 +15,11 @@ fi
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 CLIENT_DIR="${ROOT_DIR}/client"
 
-echo "Synchronizing Python environment with uv..."
-uv sync --python 3.11 --directory "${ROOT_DIR}"
-
 echo "Preparing pytorch_connectomics dependency..."
 bash "${ROOT_DIR}/scripts/setup_pytorch_connectomics.sh"
+
+echo "Synchronizing Python environment with uv..."
+uv sync --python 3.11 --directory "${ROOT_DIR}"
 
 echo "Installing frontend dependencies..."
 pushd "${CLIENT_DIR}" >/dev/null
