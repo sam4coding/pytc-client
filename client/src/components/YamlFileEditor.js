@@ -15,7 +15,10 @@ import { AppContext } from "../contexts/GlobalContext";
 
 const getYamlValue = (data, path) => {
   if (!data) return undefined;
-  return path.reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), data);
+  return path.reduce(
+    (acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined),
+    data,
+  );
 };
 
 const cloneObject = (data) => {
@@ -47,32 +50,105 @@ const CONTROL_SECTIONS = {
     {
       title: "Common training knobs",
       controls: [
-        { label: "Optimizer", path: ["SOLVER", "NAME"], type: "select", options: ["SGD", "Adam", "AdamW"] },
-        { label: "LR scheduler", path: ["SOLVER", "LR_SCHEDULER_NAME"], type: "select", options: ["MultiStepLR", "CosineAnnealingLR", "StepLR"] },
-        { label: "Learning rate", path: ["SOLVER", "BASE_LR"], type: "number", min: 0, step: 0.0001 },
-        { label: "Batch size", path: ["SOLVER", "SAMPLES_PER_BATCH"], type: "number", min: 1 },
-        { label: "Total iterations", path: ["SOLVER", "ITERATION_TOTAL"], type: "number", min: 1 },
-        { label: "Save interval", path: ["SOLVER", "ITERATION_SAVE"], type: "number", min: 1 },
-        { label: "Validation interval", path: ["SOLVER", "ITERATION_VAL"], type: "number", min: 1 },
+        {
+          label: "Optimizer",
+          path: ["SOLVER", "NAME"],
+          type: "select",
+          options: ["SGD", "Adam", "AdamW"],
+        },
+        {
+          label: "LR scheduler",
+          path: ["SOLVER", "LR_SCHEDULER_NAME"],
+          type: "select",
+          options: ["MultiStepLR", "CosineAnnealingLR", "StepLR"],
+        },
+        {
+          label: "Learning rate",
+          path: ["SOLVER", "BASE_LR"],
+          type: "number",
+          min: 0,
+          step: 0.0001,
+        },
+        {
+          label: "Batch size",
+          path: ["SOLVER", "SAMPLES_PER_BATCH"],
+          type: "number",
+          min: 1,
+        },
+        {
+          label: "Total iterations",
+          path: ["SOLVER", "ITERATION_TOTAL"],
+          type: "number",
+          min: 1,
+        },
+        {
+          label: "Save interval",
+          path: ["SOLVER", "ITERATION_SAVE"],
+          type: "number",
+          min: 1,
+        },
+        {
+          label: "Validation interval",
+          path: ["SOLVER", "ITERATION_VAL"],
+          type: "number",
+          min: 1,
+        },
       ],
     },
     {
       title: "System",
       controls: [
-        { label: "Distributed training", path: ["SYSTEM", "DISTRIBUTED"], type: "switch" },
-        { label: "Parallel mode", path: ["SYSTEM", "PARALLEL"], type: "select", options: ["DP", "DDP"] },
+        {
+          label: "Distributed training",
+          path: ["SYSTEM", "DISTRIBUTED"],
+          type: "switch",
+        },
+        {
+          label: "Parallel mode",
+          path: ["SYSTEM", "PARALLEL"],
+          type: "select",
+          options: ["DP", "DDP"],
+        },
         { label: "Debug mode", path: ["SYSTEM", "DEBUG"], type: "switch" },
       ],
     },
     {
       title: "Model",
       controls: [
-        { label: "Block type", path: ["MODEL", "BLOCK_TYPE"], type: "select", options: ["residual", "plain"] },
-        { label: "Backbone", path: ["MODEL", "BACKBONE"], type: "select", options: ["resnet", "repvgg", "botnet"] },
-        { label: "Normalization", path: ["MODEL", "NORM_MODE"], type: "select", options: ["bn", "sync_bn", "in", "gn", "none"] },
-        { label: "Activation", path: ["MODEL", "ACT_MODE"], type: "select", options: ["relu", "elu", "leaky"] },
-        { label: "Pooling layer", path: ["MODEL", "POOLING_LAYER"], type: "switch" },
-        { label: "Mixed precision", path: ["MODEL", "MIXED_PRECESION"], type: "switch" },
+        {
+          label: "Block type",
+          path: ["MODEL", "BLOCK_TYPE"],
+          type: "select",
+          options: ["residual", "plain"],
+        },
+        {
+          label: "Backbone",
+          path: ["MODEL", "BACKBONE"],
+          type: "select",
+          options: ["resnet", "repvgg", "botnet"],
+        },
+        {
+          label: "Normalization",
+          path: ["MODEL", "NORM_MODE"],
+          type: "select",
+          options: ["bn", "sync_bn", "in", "gn", "none"],
+        },
+        {
+          label: "Activation",
+          path: ["MODEL", "ACT_MODE"],
+          type: "select",
+          options: ["relu", "elu", "leaky"],
+        },
+        {
+          label: "Pooling layer",
+          path: ["MODEL", "POOLING_LAYER"],
+          type: "switch",
+        },
+        {
+          label: "Mixed precision",
+          path: ["MODEL", "MIXED_PRECESION"],
+          type: "switch",
+        },
         { label: "Aux output", path: ["MODEL", "AUX_OUT"], type: "switch" },
       ],
     },
@@ -80,21 +156,68 @@ const CONTROL_SECTIONS = {
       title: "Dataset",
       controls: [
         { label: "2D dataset", path: ["DATASET", "DO_2D"], type: "switch" },
-        { label: "Load 2D slices", path: ["DATASET", "LOAD_2D"], type: "switch" },
-        { label: "Isotropic data", path: ["DATASET", "IS_ISOTROPIC"], type: "switch" },
-        { label: "Drop channels", path: ["DATASET", "DROP_CHANNEL"], type: "switch" },
-        { label: "Reduce labels", path: ["DATASET", "REDUCE_LABEL"], type: "switch" },
-        { label: "Ensure min size", path: ["DATASET", "ENSURE_MIN_SIZE"], type: "switch" },
-        { label: "Pad mode", path: ["DATASET", "PAD_MODE"], type: "select", options: ["reflect", "constant", "symmetric"] },
+        {
+          label: "Load 2D slices",
+          path: ["DATASET", "LOAD_2D"],
+          type: "switch",
+        },
+        {
+          label: "Isotropic data",
+          path: ["DATASET", "IS_ISOTROPIC"],
+          type: "switch",
+        },
+        {
+          label: "Drop channels",
+          path: ["DATASET", "DROP_CHANNEL"],
+          type: "switch",
+        },
+        {
+          label: "Reduce labels",
+          path: ["DATASET", "REDUCE_LABEL"],
+          type: "switch",
+        },
+        {
+          label: "Ensure min size",
+          path: ["DATASET", "ENSURE_MIN_SIZE"],
+          type: "switch",
+        },
+        {
+          label: "Pad mode",
+          path: ["DATASET", "PAD_MODE"],
+          type: "select",
+          options: ["reflect", "constant", "symmetric"],
+        },
       ],
     },
     {
       title: "Solver (advanced)",
       controls: [
-        { label: "Weight decay", path: ["SOLVER", "WEIGHT_DECAY"], type: "number", min: 0, step: 0.0001 },
-        { label: "Momentum", path: ["SOLVER", "MOMENTUM"], type: "number", min: 0, max: 1, step: 0.01 },
-        { label: "Clip gradients", path: ["SOLVER", "CLIP_GRADIENTS", "ENABLED"], type: "switch" },
-        { label: "Clip value", path: ["SOLVER", "CLIP_GRADIENTS", "CLIP_VALUE"], type: "number", min: 0 },
+        {
+          label: "Weight decay",
+          path: ["SOLVER", "WEIGHT_DECAY"],
+          type: "number",
+          min: 0,
+          step: 0.0001,
+        },
+        {
+          label: "Momentum",
+          path: ["SOLVER", "MOMENTUM"],
+          type: "number",
+          min: 0,
+          max: 1,
+          step: 0.01,
+        },
+        {
+          label: "Clip gradients",
+          path: ["SOLVER", "CLIP_GRADIENTS", "ENABLED"],
+          type: "switch",
+        },
+        {
+          label: "Clip value",
+          path: ["SOLVER", "CLIP_GRADIENTS", "CLIP_VALUE"],
+          type: "number",
+          min: 0,
+        },
       ],
     },
   ],
@@ -102,19 +225,48 @@ const CONTROL_SECTIONS = {
     {
       title: "Common inference knobs",
       controls: [
-        { label: "Batch size", path: ["INFERENCE", "SAMPLES_PER_BATCH"], type: "number", min: 1 },
-        { label: "Augmentations", path: ["INFERENCE", "AUG_NUM"], type: "number", min: 1 },
-        { label: "Blending", path: ["INFERENCE", "BLENDING"], type: "select", options: ["gaussian", "constant"] },
+        {
+          label: "Batch size",
+          path: ["INFERENCE", "SAMPLES_PER_BATCH"],
+          type: "number",
+          min: 1,
+        },
+        {
+          label: "Augmentations",
+          path: ["INFERENCE", "AUG_NUM"],
+          type: "number",
+          min: 1,
+        },
+        {
+          label: "Blending",
+          path: ["INFERENCE", "BLENDING"],
+          type: "select",
+          options: ["gaussian", "constant"],
+        },
         { label: "Eval mode", path: ["INFERENCE", "DO_EVAL"], type: "switch" },
       ],
     },
     {
       title: "Inference (advanced)",
       controls: [
-        { label: "Run singly", path: ["INFERENCE", "DO_SINGLY"], type: "switch" },
+        {
+          label: "Run singly",
+          path: ["INFERENCE", "DO_SINGLY"],
+          type: "switch",
+        },
         { label: "Unpad output", path: ["INFERENCE", "UNPAD"], type: "switch" },
-        { label: "Augment mode", path: ["INFERENCE", "AUG_MODE"], type: "select", options: ["mean", "max"] },
-        { label: "Test count", path: ["INFERENCE", "TEST_NUM"], type: "number", min: 1 },
+        {
+          label: "Augment mode",
+          path: ["INFERENCE", "AUG_MODE"],
+          type: "select",
+          options: ["mean", "max"],
+        },
+        {
+          label: "Test count",
+          path: ["INFERENCE", "TEST_NUM"],
+          type: "number",
+          min: 1,
+        },
       ],
     },
   ],
@@ -185,7 +337,6 @@ const YamlFileEditor = (props) => {
 
   const displayName =
     context.uploadedYamlFile?.name || context.selectedYamlPreset;
-
 
   const renderControl = (control) => {
     const value = getYamlValue(yamlData, control.path);
@@ -264,54 +415,58 @@ const YamlFileEditor = (props) => {
                   ...switchControls,
                 ];
                 return (
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 12,
-                }}
-              >
-                {orderedControls.map((control) => {
-                  const isSwitch = control.type === "switch";
-                  return (
-                    <div
-                      key={control.path.join(".")}
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "flex-start",
-                        gap: 6,
-                        padding: "6px 8px",
-                        minWidth: 220,
-                        maxWidth: 260,
-                        flex: "1 1 220px",
-                        border: "1px solid #f0f0f0",
-                        borderRadius: 8,
-                      }}
-                    >
-                      {isSwitch ? (
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: 12,
+                    }}
+                  >
+                    {orderedControls.map((control) => {
+                      const isSwitch = control.type === "switch";
+                      return (
                         <div
+                          key={control.path.join(".")}
                           style={{
                             display: "flex",
-                            alignItems: "center",
-                            gap: 8,
+                            flexDirection: "column",
+                            alignItems: "flex-start",
+                            gap: 6,
+                            padding: "6px 8px",
+                            minWidth: 220,
+                            maxWidth: 260,
+                            flex: "1 1 220px",
+                            border: "1px solid #f0f0f0",
+                            borderRadius: 8,
                           }}
                         >
-                          {renderControl(control)}
-                          <span style={{ fontSize: 12 }}>{control.label}</span>
+                          {isSwitch ? (
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                              }}
+                            >
+                              {renderControl(control)}
+                              <span style={{ fontSize: 12 }}>
+                                {control.label}
+                              </span>
+                            </div>
+                          ) : (
+                            <>
+                              <span style={{ fontSize: 12 }}>
+                                {control.label}
+                              </span>
+                              <div style={{ width: "100%" }}>
+                                {renderControl(control)}
+                              </div>
+                            </>
+                          )}
                         </div>
-                      ) : (
-                        <>
-                          <span style={{ fontSize: 12 }}>{control.label}</span>
-                          <div style={{ width: "100%" }}>
-                            {renderControl(control)}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                      );
+                    })}
+                  </div>
                 );
               })()}
             </div>

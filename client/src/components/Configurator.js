@@ -72,7 +72,9 @@ function Configurator(props) {
       ? Boolean(context.trainingConfig)
       : Boolean(context.inferenceConfig);
 
-  const missingBase = hasConfig ? [] : ["base configuration (preset or upload)"];
+  const missingBase = hasConfig
+    ? []
+    : ["base configuration (preset or upload)"];
 
   const missingByStep = useMemo(() => {
     if (current === 0) return missingInputs;

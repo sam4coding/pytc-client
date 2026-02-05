@@ -1,5 +1,11 @@
 // global FileReader
-import React, { Fragment, useContext, useEffect, useMemo, useState } from "react";
+import React, {
+  Fragment,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import {
   Button,
   Col,
@@ -147,7 +153,6 @@ const YamlFileUploader = (props) => {
     }
   };
 
-
   const syncYamlContext = (yamlData) => {
     if (!yamlData) return;
     if (yamlData.SYSTEM) {
@@ -163,9 +168,7 @@ const YamlFileUploader = (props) => {
         YAMLContext.setLearningRate(yamlData.SOLVER.BASE_LR);
       }
       if (typeof yamlData.SOLVER.SAMPLES_PER_BATCH === "number") {
-        YAMLContext.setSolverSamplesPerBatch(
-          yamlData.SOLVER.SAMPLES_PER_BATCH,
-        );
+        YAMLContext.setSolverSamplesPerBatch(yamlData.SOLVER.SAMPLES_PER_BATCH);
       }
     }
     if (yamlData.INFERENCE) {
@@ -276,7 +279,6 @@ const YamlFileUploader = (props) => {
     applyYamlData(yamlData);
   };
 
-
   const handleArchitectureChange = (value) => {
     const yamlData = updateYamlValue("MODEL", "ARCHITECTURE", value);
     if (!yamlData) return;
@@ -359,7 +361,14 @@ const YamlFileUploader = (props) => {
       </Space>
 
       {(context.uploadedYamlFile || context.selectedYamlPreset) && (
-        <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
+        <div
+          style={{
+            marginBottom: 12,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+          }}
+        >
           <strong>Loaded:</strong>{" "}
           {context.uploadedYamlFile?.name || context.selectedYamlPreset}
           {context.selectedYamlPreset && presetYamlText && (
@@ -406,8 +415,12 @@ const YamlFileUploader = (props) => {
                 )
               : "—"}
           </div>
-          <div>Image name: {getFileName(getPathValue(context.inputImage)) || "—"}</div>
-          <div>Label name: {getFileName(getPathValue(context.inputLabel)) || "—"}</div>
+          <div>
+            Image name: {getFileName(getPathValue(context.inputImage)) || "—"}
+          </div>
+          <div>
+            Label name: {getFileName(getPathValue(context.inputLabel)) || "—"}
+          </div>
           <div>Output path: {getPathValue(context.outputPath) || "—"}</div>
         </div>
       </div>
