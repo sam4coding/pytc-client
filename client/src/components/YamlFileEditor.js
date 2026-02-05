@@ -4,6 +4,7 @@ import {
   Divider,
   Input,
   InputNumber,
+  Modal,
   message,
   Select,
   Space,
@@ -110,7 +111,6 @@ const CONTROL_SECTIONS = {
 const YamlFileEditor = (props) => {
   const context = useContext(AppContext);
   const [yamlContent, setYamlContent] = useState("");
-  const [isExpanded, setIsExpanded] = useState(false);
   const [showRaw, setShowRaw] = useState(false);
 
   const { type } = props;
@@ -273,20 +273,30 @@ const YamlFileEditor = (props) => {
           ))}
 
           <Space style={{ marginBottom: 8 }}>
-            <Button size="small" onClick={() => setShowRaw(!showRaw)}>
-              {showRaw ? "Hide raw YAML" : "Show raw YAML"}
-            </Button>
-            <Button size="small" onClick={() => setIsExpanded(!isExpanded)}>
-              {isExpanded ? "Collapse editor" : "Expand editor"}
+            <Button size="small" onClick={() => setShowRaw(true)}>
+              Open raw YAML
             </Button>
           </Space>
-          {showRaw && (
+          <Modal
+            open={showRaw}
+            onCancel={() => setShowRaw(false)}
+            footer={null}
+            width={900}
+            style={{ top: 48 }}
+            styles={{
+              body: {
+                height: "70vh",
+                padding: "16px 20px 20px",
+              },
+            }}
+            title={displayName ? `Raw YAML — ${displayName}` : "Raw YAML"}
+          >
             <Input.TextArea
               value={yamlContent}
               onChange={handleTextAreaChange}
-              autoSize={{ minRows: isExpanded ? 16 : 6, maxRows: 32 }}
+              style={{ height: "100%", fontFamily: "monospace" }}
             />
-          )}
+          </Modal>
         </>
       )}
     </div>
