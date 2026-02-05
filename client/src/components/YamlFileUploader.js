@@ -29,6 +29,7 @@ const YamlFileUploader = (props) => {
 
   const [yamlContent, setYamlContent] = useState("");
   const [presetOptions, setPresetOptions] = useState([]);
+  const [presetYamlText, setPresetYamlText] = useState(null);
   const [architectureOptions, setArchitectureOptions] = useState([]);
   const [isLoadingPresets, setIsLoadingPresets] = useState(false);
   const [isLoadingArchitectures, setIsLoadingArchitectures] = useState(false);
@@ -118,6 +119,12 @@ const YamlFileUploader = (props) => {
     return val.path || val.folderPath || "";
   };
 
+  const getFileName = (path) => {
+    if (!path) return "";
+    const parts = path.split(/[/\\]/);
+    return parts[parts.length - 1];
+  };
+
   const updateInputSelectorInformation = (yamlData) => {
     const inputImagePath = getPathValue(context.inputImage);
     const inputLabelPath = getPathValue(context.inputLabel);
@@ -126,6 +133,7 @@ const YamlFileUploader = (props) => {
       return;
     }
 
+    // INPUT_PATH is the shared parent directory for image/label so names can be relative.
     const inputPath = findCommonPartOfString(inputImagePath, inputLabelPath);
 
     yamlData.DATASET = yamlData.DATASET || {};
@@ -190,6 +198,16 @@ const YamlFileUploader = (props) => {
     }
   };
 
+  const normalizeYamlText = (text) => {
+    if (!text) return "";
+    try {
+      const parsed = yaml.load(text);
+      return yaml.dump(parsed, { indent: 2 }).replace(/^\s*\n/gm, "");
+    } catch (error) {
+      return text;
+    }
+  };
+
   const parseYaml = (yamlText, showError = true) => {
     if (!yamlText) return null;
     try {
@@ -205,6 +223,7 @@ const YamlFileUploader = (props) => {
   const handleFileUpload = (file) => {
     context.setUploadedYamlFile(file);
     context.setSelectedYamlPreset(null);
+    setPresetYamlText(null);
     const reader = new FileReader();
     reader.onload = (e) => {
       const contents = e.target.result;
@@ -219,6 +238,7 @@ const YamlFileUploader = (props) => {
     setIsLoadingPresets(true);
     try {
       const res = await getConfigPresetContent(value);
+      setPresetYamlText(res.content || null);
       const yamlData = parseYaml(res.content);
       if (!yamlData) return;
       context.setSelectedYamlPreset(value);
@@ -241,6 +261,13 @@ const YamlFileUploader = (props) => {
     yamlData[location] = yamlData[location] || {};
     yamlData[location][property] = newValue;
     return yamlData;
+  };
+
+  const handleRevertPreset = () => {
+    if (!presetYamlText) return;
+    const yamlData = parseYaml(presetYamlText);
+    if (!yamlData) return;
+    applyYamlData(yamlData, "Preset restored");
   };
 
   const handleSliderChange = (location, property, newValue) => {
@@ -332,13 +359,58 @@ const YamlFileUploader = (props) => {
       </Space>
 
       {(context.uploadedYamlFile || context.selectedYamlPreset) && (
-        <div style={{ marginBottom: 12 }}>
+        <div style={{ marginBottom: 12, display: "flex", alignItems: "center", gap: 8 }}>
           <strong>Loaded:</strong>{" "}
           {context.uploadedYamlFile?.name || context.selectedYamlPreset}
+          {context.selectedYamlPreset && presetYamlText && (
+            <>
+              <span style={{ color: "#fa8c16", fontSize: 12 }}>
+                {normalizeYamlText(getCurrentConfig()) !==
+                normalizeYamlText(presetYamlText)
+                  ? "Modified"
+                  : "Preset"}
+              </span>
+              {normalizeYamlText(getCurrentConfig()) !==
+                normalizeYamlText(presetYamlText) && (
+                <Button size="small" type="link" onClick={handleRevertPreset}>
+                  Revert to preset
+                </Button>
+              )}
+            </>
+          )}
         </div>
       )}
 
       <Divider style={{ margin: "12px 0" }} />
+
+      <div
+        style={{
+          marginBottom: 12,
+          padding: "8px 12px",
+          background: "#fafafa",
+          border: "1px solid #f0f0f0",
+          borderRadius: 8,
+          fontSize: 12,
+        }}
+      >
+        <strong>Effective dataset paths</strong>
+        <div style={{ marginTop: 4 }}>
+          <div>
+            {/* Common folder mirrors DATASET.INPUT_PATH = shared parent dir */}
+            Common folder:{" "}
+            {getPathValue(context.inputImage) &&
+            getPathValue(context.inputLabel)
+              ? findCommonPartOfString(
+                  getPathValue(context.inputImage),
+                  getPathValue(context.inputLabel),
+                )
+              : "—"}
+          </div>
+          <div>Image name: {getFileName(getPathValue(context.inputImage)) || "—"}</div>
+          <div>Label name: {getFileName(getPathValue(context.inputLabel)) || "—"}</div>
+          <div>Output path: {getPathValue(context.outputPath) || "—"}</div>
+        </div>
+      </div>
 
       <Row gutter={[16, 16]}>
         <Col span={12}>
