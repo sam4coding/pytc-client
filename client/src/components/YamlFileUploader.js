@@ -19,8 +19,8 @@ import {
   getConfigPresets,
   getConfigPresetContent,
   getModelArchitectures,
-} from "../utils/api";
-import { findCommonPartOfString } from "../utils/utils";
+} from "../api";
+import { findCommonPartOfString } from "../utils";
 
 const YamlFileUploader = (props) => {
   const context = useContext(AppContext);

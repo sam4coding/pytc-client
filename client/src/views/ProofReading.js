@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Layout, message, Spin, Empty } from "antd";
-import apiClient from "../services/apiClient";
+import { apiClient } from "../api";
 import NeuroglancerViewer from "../components/NeuroglancerViewer";
 import SynapseList from "../components/SynapseList";
 import ProofreadingControls from "../components/ProofreadingControls";

@@ -7,7 +7,7 @@ import {
   QuestionCircleOutlined,
 } from "@ant-design/icons";
 import ProofreadingEditor from "./ProofreadingEditor";
-import apiClient from "../../services/apiClient";
+import { apiClient } from "../../api";
 
 /**
  * Unified Image Editor Component

@@ -12,13 +12,12 @@ import {
 
 const { Title, Text } = Typography;
 
-const WorkflowSelector = ({ visible, onSelect, onCancel, isManual }) => {
+const WorkflowSelector = ({ visible, onSelect, onCancel }) => {
   // Default to having Files selected
   const [selectedModes, setSelectedModes] = useState(["files"]);
-  const [remember, setRemember] = useState(false);
 
   const handleOk = () => {
-    onSelect(selectedModes, remember);
+    onSelect(selectedModes);
   };
 
   const options = [
@@ -49,11 +48,7 @@ const WorkflowSelector = ({ visible, onSelect, onCancel, isManual }) => {
 
   return (
     <Modal
-      title={
-        <Title level={4}>
-          {isManual ? "Update Startup Preference" : "Select Workflows"}
-        </Title>
-      }
+      title={<Title level={4}>Change Views</Title>}
       open={visible}
       onOk={handleOk}
       onCancel={onCancel}
@@ -66,20 +61,14 @@ const WorkflowSelector = ({ visible, onSelect, onCancel, isManual }) => {
           block
           disabled={selectedModes.length === 0}
         >
-          {isManual ? "Save Preference" : "Launch Selected"}
+          Launch Selected
         </Button>,
       ]}
-      closable={isManual} // Allow closing if manual
-      maskClosable={isManual}
       centered
       width={600}
     >
       <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <Text type="secondary">
-          {isManual
-            ? "Choose the tabs you want to see automatically next time."
-            : "Choose the tabs you want to work with in this session."}
-        </Text>
+        <Text type="secondary">Select the workflows you want to use.</Text>
       </div>
 
       <Checkbox.Group
@@ -116,17 +105,6 @@ const WorkflowSelector = ({ visible, onSelect, onCancel, isManual }) => {
           ))}
         </Row>
       </Checkbox.Group>
-
-      <div style={{ marginTop: 24, textAlign: "center" }}>
-        <Checkbox
-          checked={remember}
-          onChange={(e) => setRemember(e.target.checked)}
-        >
-          {isManual
-            ? "Enable auto-launch with these settings"
-            : "Remember my choice"}
-        </Checkbox>
-      </div>
     </Modal>
   );
 };
