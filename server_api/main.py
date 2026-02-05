@@ -47,7 +47,6 @@ def _ensure_chatbot():
         return False
 
 
-
 REACT_APP_SERVER_PROTOCOL = "http"
 REACT_APP_SERVER_URL = "localhost:4243"
 
@@ -136,9 +135,7 @@ def get_pytc_config(path: str):
 def list_pytc_architectures():
     architectures = _read_model_architectures()
     if not architectures:
-        raise HTTPException(
-            status_code=404, detail="No model architectures found."
-        )
+        raise HTTPException(status_code=404, detail="No model architectures found.")
     return {"architectures": architectures}
 
 
