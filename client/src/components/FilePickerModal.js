@@ -3,10 +3,9 @@ import { Modal, List, Breadcrumb, Button, Spin, message } from "antd";
 import {
   FolderFilled,
   FileOutlined,
-  HomeOutlined,
   ArrowUpOutlined,
 } from "@ant-design/icons";
-import apiClient from "../services/apiClient";
+import { apiClient } from "../api";
 
 const FilePickerModal = ({
   visible,
@@ -18,7 +17,6 @@ const FilePickerModal = ({
   const [currentPath, setCurrentPath] = useState("root");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [folders, setFolders] = useState([]); // To track folder structure for breadcrumbs
 
   useEffect(() => {
     if (visible) {
@@ -53,22 +51,6 @@ const FilePickerModal = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleItemClick = (item) => {
-    if (item.is_folder) {
-      setCurrentPath(String(item.id));
-    } else {
-      // It's a file
-      if (selectionType === "file" || selectionType === "fileOrDirectory") {
-        onSelect(item);
-      }
-    }
-  };
-
-  const handleNavigateUp = () => {
-    if (currentPath === "root") return;
-    // ... navigation logic ...
   };
 
   // Refactored fetch to get all files once

@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import "./App.css";
 import Views from "./views/Views";
 import { AppContext, ContextWrapper } from "./contexts/GlobalContext";
-import UserContextWrapper from "./contexts/UserContext";
 import { YamlContextWrapper } from "./contexts/YamlContext";
 
 function CacheBootstrapper({ children }) {
@@ -37,7 +36,6 @@ function MainContent() {
 
 function App() {
   return (
-    <UserContextWrapper>
       <ContextWrapper>
         <YamlContextWrapper>
           <CacheBootstrapper>
@@ -47,7 +45,6 @@ function App() {
           </CacheBootstrapper>
         </YamlContextWrapper>
       </ContextWrapper>
-    </UserContextWrapper>
   );
 }
 

@@ -45,7 +45,7 @@ const UnifiedFileInput = ({
             ? ["openFile", "openDirectory"]
             : ["openFile"];
 
-      const filePath = await ipcRenderer.invoke("dialog:openFile", {
+      const filePath = await ipcRenderer.invoke("open-local-file", {
         properties,
       });
       if (filePath) {
@@ -53,8 +53,8 @@ const UnifiedFileInput = ({
         onChange({ path: filePath, display: filePath });
       }
     } catch (error) {
-      console.error("Error opening file dialog:", error);
-      message.error("Failed to open file dialog");
+      console.error("Failed to open file:", error);
+      message.error("Failed to open file");
     }
   };
 

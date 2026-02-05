@@ -21,7 +21,7 @@ import {
   EyeOutlined,
   LayoutOutlined,
 } from "@ant-design/icons";
-import apiClient from "../services/apiClient";
+import { apiClient } from "../api";
 import FileTreeSidebar from "../components/FileTreeSidebar";
 
 // Transform backend file list into UI state

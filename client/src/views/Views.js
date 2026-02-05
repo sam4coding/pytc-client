@@ -2,13 +2,11 @@ import React, { useState, useEffect } from "react";
 import { Layout, Menu, message, Button, Drawer } from "antd";
 import {
   FolderOpenOutlined,
-  DesktopOutlined,
   EyeOutlined,
   ExperimentOutlined,
   ThunderboltOutlined,
   DashboardOutlined,
   BugOutlined,
-  ReadOutlined,
   ApartmentOutlined,
   MessageOutlined,
 } from "@ant-design/icons";
@@ -21,7 +19,7 @@ import ProofReading from "./ProofReading";
 import WormErrorHandling from "./WormErrorHandling";
 import WorkflowSelector from "../components/WorkflowSelector";
 import Chatbot from "../components/Chatbot";
-import apiClient from "../services/apiClient";
+import { apiClient } from "../api";
 
 const { Content } = Layout;
 
@@ -33,7 +31,6 @@ function Views() {
   const [visibleTabs, setVisibleTabs] = useState(new Set(["files"]));
   const [visitedTabs, setVisitedTabs] = useState(new Set(["files"]));
   const [workflowModalVisible, setWorkflowModalVisible] = useState(false);
-  const [isManualChange, setIsManualChange] = useState(false); // Flag for "Change Startup Mode"
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [apiReady, setApiReady] = useState(false);
   const [hasShownApiWarning, setHasShownApiWarning] = useState(false);
@@ -129,13 +126,11 @@ function Views() {
       // If no file found or error reading it, show selector (Initial Launch)
       if (isMounted) {
         setWorkflowModalVisible(true)
-        setIsManualChange(false)
       }
 
     } catch (err) {
       if (isMounted) {
         setWorkflowModalVisible(true)
-        setIsManualChange(false)
       }
     }
   }
@@ -171,19 +166,14 @@ function Views() {
     };
   }, [hasShownApiWarning]);
 
-  const handleWorkflowSelect = async (modes, remember) => {
+  const handleWorkflowSelect = async (modes) => {
     setWorkflowModalVisible(false);
-
-    // Render logic: Only if NOT manual change
-    if (!isManualChange) {
-      applyModes(modes);
-    }
+    applyModes(modes);
 
     // Persistence Logic
     try {
       if (!apiReady) {
         message.warning('API server is not ready. Preference was not saved.')
-        setIsManualChange(false)
         return
       }
       // 1. Always delete existing to avoid staleness or duplicates
@@ -195,37 +185,25 @@ function Views() {
         await apiClient.delete(`/files/${f.id}`);
       }
 
-      // 2. If Remember is checked, Save new
-      if (remember) {
-        const jsonContent = JSON.stringify({ modes });
-        const blob = new Blob([jsonContent], { type: "application/json" });
-        const file = new File([blob], PREF_FILE_NAME, {
-          type: "application/json",
-        });
+      // Save new preferences
+      const jsonContent = JSON.stringify({ modes });
+      const blob = new Blob([jsonContent], { type: "application/json" });
+      const file = new File([blob], PREF_FILE_NAME, {
+        type: "application/json",
+      });
 
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("path", "root");
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("path", "root");
 
-        await apiClient.post("/files/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        if (isManualChange) {
-          message.success("Preferences saved for next launch");
-        }
-      } else {
-        // Remember is UNCHECKED
-        if (isManualChange) {
-          message.info("Startup preference cleared");
-        }
-      }
+      await apiClient.post("/files/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      message.success("Preferences saved");
     } catch (err) {
-      console.error("Failed to update preference", err);
-      message.error("Failed to update preference");
+      console.error("Failed to update preferences", err);
+      message.error("Failed to update preferences");
     }
-
-    // Reset manual flag
-    setIsManualChange(false);
   };
 
   // IPC Listener
@@ -237,7 +215,7 @@ function Views() {
       return;
     }
 
-    const handleToggleTab = (event, key, checked) => {
+    const handleToggleTab = (_event, key, checked) => {
       setVisibleTabs((prev) => {
         const newSet = new Set(prev);
         if (checked) {
@@ -250,19 +228,17 @@ function Views() {
       });
     };
 
-    const handleResetPreference = () => {
-      // User clicked "Change Startup Mode"
-      // We set isManualChange = true, so selecting doesn't render immediately
-      setIsManualChange(true);
+    const handleChangeViews = () => {
+      // User clicked "Change Views"
       setWorkflowModalVisible(true);
     };
 
     ipcRenderer.on("toggle-tab", handleToggleTab);
-    ipcRenderer.on("reset-preference", handleResetPreference);
+    ipcRenderer.on("change-views", handleChangeViews);
 
     return () => {
       ipcRenderer.removeListener("toggle-tab", handleToggleTab);
-      ipcRenderer.removeListener("reset-preference", handleResetPreference);
+      ipcRenderer.removeListener("change-views", handleChangeViews);
     };
   }, [current]);
 
@@ -284,14 +260,7 @@ function Views() {
         onSelect={handleWorkflowSelect}
         onCancel={() => {
           setWorkflowModalVisible(false);
-          setIsManualChange(false);
-          // If initial launch and cancelled, maybe just files?
-          if (!isManualChange && visitedTabs.size <= 1) {
-            // simple heuristic
-            // already files by default
-          }
         }}
-        isManual={isManualChange}
       />
 
       <div

@@ -5,7 +5,7 @@ import LayerGrid from "./LayerGrid";
 import ClassificationPanel from "./ClassificationPanel";
 import ProgressTracker from "./ProgressTracker";
 import UnifiedImageEditor from "./UnifiedImageEditor";
-import apiClient from "../../services/apiClient";
+import { apiClient } from "../../api";
 
 const { Sider, Content } = Layout;
 
