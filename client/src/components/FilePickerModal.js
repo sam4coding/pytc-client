@@ -1,10 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal, List, Breadcrumb, Button, Spin, message } from "antd";
-import {
-  FolderFilled,
-  FileOutlined,
-  ArrowUpOutlined,
-} from "@ant-design/icons";
+import { FolderFilled, FileOutlined, ArrowUpOutlined } from "@ant-design/icons";
 import { apiClient } from "../api";
 
 const FilePickerModal = ({

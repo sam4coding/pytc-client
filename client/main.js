@@ -1,6 +1,13 @@
 const path = require("path");
 const url = require("url");
-const { app, BrowserWindow, ipcMain, dialog, Menu, screen } = require("electron");
+const {
+  app,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  Menu,
+  screen,
+} = require("electron");
 
 let mainWindow;
 
@@ -43,10 +50,7 @@ function createMenu() {
   const template = [
     {
       label: "Electron",
-      submenu: [
-        { role: "toggleDevTools" },
-        { role: "quit" },
-      ],
+      submenu: [{ role: "toggleDevTools" }, { role: "quit" }],
     },
     {
       label: "Views",
@@ -142,7 +146,9 @@ function createMenu() {
 
 ipcMain.handle("open-local-file", async (_event, options = {}) => {
   const properties = options.properties;
-  const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, { properties });
+  const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+    properties,
+  });
   if (canceled) {
     return null;
   } else {

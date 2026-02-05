@@ -48,11 +48,7 @@ const WorkflowSelector = ({ visible, onSelect, onCancel }) => {
 
   return (
     <Modal
-      title={
-        <Title level={4}>
-          Change Views
-        </Title>
-      }
+      title={<Title level={4}>Change Views</Title>}
       open={visible}
       onOk={handleOk}
       onCancel={onCancel}
@@ -72,9 +68,7 @@ const WorkflowSelector = ({ visible, onSelect, onCancel }) => {
       width={600}
     >
       <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <Text type="secondary">
-          Select the workflows you want to use.
-        </Text>
+        <Text type="secondary">Select the workflows you want to use.</Text>
       </div>
 
       <Checkbox.Group

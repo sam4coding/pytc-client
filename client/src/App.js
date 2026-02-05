@@ -36,15 +36,15 @@ function MainContent() {
 
 function App() {
   return (
-      <ContextWrapper>
-        <YamlContextWrapper>
-          <CacheBootstrapper>
-            <div className="App">
-              <MainContent />
-            </div>
-          </CacheBootstrapper>
-        </YamlContextWrapper>
-      </ContextWrapper>
+    <ContextWrapper>
+      <YamlContextWrapper>
+        <CacheBootstrapper>
+          <div className="App">
+            <MainContent />
+          </div>
+        </CacheBootstrapper>
+      </YamlContextWrapper>
+    </ContextWrapper>
   );
 }
 

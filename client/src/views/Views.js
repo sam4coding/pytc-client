@@ -90,50 +90,51 @@ function Views() {
 
   const checkPreference = async (isMounted) => {
     try {
-      const res = await apiClient.get('/files')
-      const fileList = res.data || []
+      const res = await apiClient.get("/files");
+      const fileList = res.data || [];
 
       // Find saved preference file
-      const prefFile = fileList.find(f => f.name === PREF_FILE_NAME && !f.is_folder)
+      const prefFile = fileList.find(
+        (f) => f.name === PREF_FILE_NAME && !f.is_folder,
+      );
 
       if (prefFile && prefFile.physical_path) {
         try {
-          let pathForUrl = prefFile.physical_path.replace(/\\/g, '/')
-          if (pathForUrl.includes('uploads/')) {
-            const parts = pathForUrl.split('uploads/')
+          let pathForUrl = prefFile.physical_path.replace(/\\/g, "/");
+          if (pathForUrl.includes("uploads/")) {
+            const parts = pathForUrl.split("uploads/");
             if (parts.length > 1) {
-              pathForUrl = 'uploads/' + parts[parts.length - 1]
+              pathForUrl = "uploads/" + parts[parts.length - 1];
             }
           }
-          const fileUrl = `${apiClient.defaults.baseURL || 'http://localhost:4242'}/${pathForUrl}`
+          const fileUrl = `${apiClient.defaults.baseURL || "http://localhost:4242"}/${pathForUrl}`;
 
-          const contentRes = await fetch(fileUrl)
+          const contentRes = await fetch(fileUrl);
           if (contentRes.ok) {
-            const data = await contentRes.json()
+            const data = await contentRes.json();
             if (data) {
-              const modes = data.modes || data.mode
+              const modes = data.modes || data.mode;
               if (modes) {
-                applyModes(modes)
-                return
+                applyModes(modes);
+                return;
               }
             }
           }
         } catch (err) {
-          console.error('Error reading pref file content', err)
+          console.error("Error reading pref file content", err);
         }
       }
 
       // If no file found or error reading it, show selector (Initial Launch)
       if (isMounted) {
-        setWorkflowModalVisible(true)
+        setWorkflowModalVisible(true);
       }
-
     } catch (err) {
       if (isMounted) {
-        setWorkflowModalVisible(true)
+        setWorkflowModalVisible(true);
       }
     }
-  }
+  };
 
   // Wait for API readiness before loading preferences
   useEffect(() => {
@@ -173,8 +174,8 @@ function Views() {
     // Persistence Logic
     try {
       if (!apiReady) {
-        message.warning('API server is not ready. Preference was not saved.')
-        return
+        message.warning("API server is not ready. Preference was not saved.");
+        return;
       }
       // 1. Always delete existing to avoid staleness or duplicates
       const res = await apiClient.get("/files");
@@ -323,7 +324,7 @@ function Views() {
         mask={false}
         closable={false}
         destroyOnClose
-        styles={{ header: { display: 'none' }, body: { padding: 0 } }}
+        styles={{ header: { display: "none" }, body: { padding: 0 } }}
       >
         <Chatbot onClose={() => setIsChatOpen(false)} />
       </Drawer>

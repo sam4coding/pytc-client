@@ -76,8 +76,7 @@ export async function checkFile(file) {
 function handleError(error) {
   if (error.response) {
     const detail = error.response.data?.detail;
-    const detailMessage =
-      typeof detail === "string" ? detail : detail?.data;
+    const detailMessage = typeof detail === "string" ? detail : detail?.data;
     throw new Error(
       `${error.response.status}: ${detailMessage || error.response.statusText}`,
     );
@@ -316,9 +315,7 @@ export async function startModelInference(
 
 export async function getInferenceStatus() {
   try {
-    const res = await axios.get(
-      `${BASE_URL}/inference_status`,
-    );
+    const res = await axios.get(`${BASE_URL}/inference_status`);
     return res.data;
   } catch (error) {
     console.error("Failed to get inference status:", error);
@@ -336,10 +333,7 @@ export async function stopModelInference() {
 
 export async function queryChatBot(query) {
   try {
-    const res = await axios.post(
-      `${BASE_URL}/chat/query`,
-      { query },
-    );
+    const res = await axios.post(`${BASE_URL}/chat/query`, { query });
     return res.data?.response;
   } catch (error) {
     handleError(error);
@@ -348,9 +342,7 @@ export async function queryChatBot(query) {
 
 export async function clearChat() {
   try {
-    await axios.post(
-      `${BASE_URL}/chat/clear`,
-    );
+    await axios.post(`${BASE_URL}/chat/clear`);
   } catch (error) {
     handleError(error);
   }
