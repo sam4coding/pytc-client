@@ -45,6 +45,18 @@ const setYamlValue = (data, path, value) => {
 const CONTROL_SECTIONS = {
   training: [
     {
+      title: "Common training knobs",
+      controls: [
+        { label: "Optimizer", path: ["SOLVER", "NAME"], type: "select", options: ["SGD", "Adam", "AdamW"] },
+        { label: "LR scheduler", path: ["SOLVER", "LR_SCHEDULER_NAME"], type: "select", options: ["MultiStepLR", "CosineAnnealingLR", "StepLR"] },
+        { label: "Learning rate", path: ["SOLVER", "BASE_LR"], type: "number", min: 0, step: 0.0001 },
+        { label: "Batch size", path: ["SOLVER", "SAMPLES_PER_BATCH"], type: "number", min: 1 },
+        { label: "Total iterations", path: ["SOLVER", "ITERATION_TOTAL"], type: "number", min: 1 },
+        { label: "Save interval", path: ["SOLVER", "ITERATION_SAVE"], type: "number", min: 1 },
+        { label: "Validation interval", path: ["SOLVER", "ITERATION_VAL"], type: "number", min: 1 },
+      ],
+    },
+    {
       title: "System",
       controls: [
         { label: "Distributed training", path: ["SYSTEM", "DISTRIBUTED"], type: "switch" },
@@ -77,14 +89,8 @@ const CONTROL_SECTIONS = {
       ],
     },
     {
-      title: "Solver",
+      title: "Solver (advanced)",
       controls: [
-        { label: "Optimizer", path: ["SOLVER", "NAME"], type: "select", options: ["SGD", "Adam", "AdamW"] },
-        { label: "LR scheduler", path: ["SOLVER", "LR_SCHEDULER_NAME"], type: "select", options: ["MultiStepLR", "CosineAnnealingLR", "StepLR"] },
-        { label: "Learning rate", path: ["SOLVER", "BASE_LR"], type: "number", min: 0, step: 0.0001 },
-        { label: "Total iterations", path: ["SOLVER", "ITERATION_TOTAL"], type: "number", min: 1 },
-        { label: "Save interval", path: ["SOLVER", "ITERATION_SAVE"], type: "number", min: 1 },
-        { label: "Validation interval", path: ["SOLVER", "ITERATION_VAL"], type: "number", min: 1 },
         { label: "Weight decay", path: ["SOLVER", "WEIGHT_DECAY"], type: "number", min: 0, step: 0.0001 },
         { label: "Momentum", path: ["SOLVER", "MOMENTUM"], type: "number", min: 0, max: 1, step: 0.01 },
         { label: "Clip gradients", path: ["SOLVER", "CLIP_GRADIENTS", "ENABLED"], type: "switch" },
@@ -94,15 +100,21 @@ const CONTROL_SECTIONS = {
   ],
   inference: [
     {
-      title: "Inference",
+      title: "Common inference knobs",
+      controls: [
+        { label: "Batch size", path: ["INFERENCE", "SAMPLES_PER_BATCH"], type: "number", min: 1 },
+        { label: "Augmentations", path: ["INFERENCE", "AUG_NUM"], type: "number", min: 1 },
+        { label: "Blending", path: ["INFERENCE", "BLENDING"], type: "select", options: ["gaussian", "constant"] },
+        { label: "Eval mode", path: ["INFERENCE", "DO_EVAL"], type: "switch" },
+      ],
+    },
+    {
+      title: "Inference (advanced)",
       controls: [
         { label: "Run singly", path: ["INFERENCE", "DO_SINGLY"], type: "switch" },
         { label: "Unpad output", path: ["INFERENCE", "UNPAD"], type: "switch" },
-        { label: "Eval mode", path: ["INFERENCE", "DO_EVAL"], type: "switch" },
-        { label: "Blending", path: ["INFERENCE", "BLENDING"], type: "select", options: ["gaussian", "constant"] },
         { label: "Augment mode", path: ["INFERENCE", "AUG_MODE"], type: "select", options: ["mean", "max"] },
         { label: "Test count", path: ["INFERENCE", "TEST_NUM"], type: "number", min: 1 },
-        { label: "Batch size", path: ["INFERENCE", "SAMPLES_PER_BATCH"], type: "number", min: 1 },
       ],
     },
   ],
@@ -138,6 +150,8 @@ const YamlFileEditor = (props) => {
     }
   };
 
+  const [rawError, setRawError] = useState("");
+
   const handleTextAreaChange = (event) => {
     const updatedYamlContent = event.target.value;
     setYamlContent(updatedYamlContent);
@@ -148,8 +162,9 @@ const YamlFileEditor = (props) => {
     }
     try {
       yaml.load(updatedYamlContent);
+      setRawError("");
     } catch (error) {
-      message.error("Error parsing YAML content.");
+      setRawError("YAML has a syntax error.");
     }
   };
 
@@ -193,7 +208,7 @@ const YamlFileEditor = (props) => {
             value: option,
             label: option,
           }))}
-          style={{ minWidth: 180 }}
+          style={{ minWidth: 0, width: "100%" }}
         />
       );
     }
@@ -209,6 +224,7 @@ const YamlFileEditor = (props) => {
             if (val === null) return;
             updateYaml(control.path, val);
           }}
+          style={{ width: "100%" }}
         />
       );
     }
@@ -219,7 +235,7 @@ const YamlFileEditor = (props) => {
   const sections = CONTROL_SECTIONS[type] || [];
 
   return (
-    <div style={{ padding: "12px 16px" }}>
+    <div style={{ padding: "8px 12px" }}>
       {displayName && (
         <div style={{ marginBottom: 12 }}>
           <h3 style={{ marginBottom: 8 }}>{displayName}</h3>
@@ -232,43 +248,72 @@ const YamlFileEditor = (props) => {
       ) : (
         <>
           {sections.map((section) => (
-            <div key={section.title} style={{ marginBottom: 16 }}>
-              <Divider orientation="left" style={{ margin: "12px 0" }}>
+            <div key={section.title} style={{ marginBottom: 10 }}>
+              <Divider orientation="left" style={{ margin: "8px 0" }}>
                 {section.title}
               </Divider>
+              {(() => {
+                const nonSwitchControls = section.controls.filter(
+                  (control) => control.type !== "switch",
+                );
+                const switchControls = section.controls.filter(
+                  (control) => control.type === "switch",
+                );
+                const orderedControls = [
+                  ...nonSwitchControls,
+                  ...switchControls,
+                ];
+                return (
               <div
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-                  gap: 16,
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 12,
                 }}
               >
-                {section.controls.map((control) => (
-                  <div
-                    key={control.path.join(".")}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-start",
-                      gap: 12,
-                      padding: "8px 10px",
-                      border: "1px solid #f0f0f0",
-                      borderRadius: 8,
-                    }}
-                  >
+                {orderedControls.map((control) => {
+                  const isSwitch = control.type === "switch";
+                  return (
                     <div
+                      key={control.path.join(".")}
                       style={{
                         display: "flex",
-                        alignItems: "center",
+                        flexDirection: "column",
+                        alignItems: "flex-start",
                         gap: 6,
+                        padding: "6px 8px",
+                        minWidth: 220,
+                        maxWidth: 260,
+                        flex: "1 1 220px",
+                        border: "1px solid #f0f0f0",
+                        borderRadius: 8,
                       }}
                     >
-                      <span style={{ fontSize: 13 }}>{control.label}</span>
+                      {isSwitch ? (
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                          }}
+                        >
+                          {renderControl(control)}
+                          <span style={{ fontSize: 12 }}>{control.label}</span>
+                        </div>
+                      ) : (
+                        <>
+                          <span style={{ fontSize: 12 }}>{control.label}</span>
+                          <div style={{ width: "100%" }}>
+                            {renderControl(control)}
+                          </div>
+                        </>
+                      )}
                     </div>
-                    <div style={{ width: "100%" }}>{renderControl(control)}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
+                );
+              })()}
             </div>
           ))}
 
@@ -291,6 +336,48 @@ const YamlFileEditor = (props) => {
             }}
             title={displayName ? `Raw YAML — ${displayName}` : "Raw YAML"}
           >
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <Button
+                size="small"
+                onClick={() => {
+                  try {
+                    const parsed = yaml.load(yamlContent);
+                    const formatted = yaml
+                      .dump(parsed, { indent: 2 })
+                      .replace(/^\s*\n/gm, "");
+                    setYamlContent(formatted);
+                    if (type === "training") {
+                      context.setTrainingConfig(formatted);
+                    } else {
+                      context.setInferenceConfig(formatted);
+                    }
+                    setRawError("");
+                  } catch (error) {
+                    message.error("Could not format YAML.");
+                  }
+                }}
+              >
+                Format YAML
+              </Button>
+              <Button
+                size="small"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(yamlContent || "");
+                    message.success("Copied");
+                  } catch (error) {
+                    message.error("Copy failed");
+                  }
+                }}
+              >
+                Copy
+              </Button>
+              {rawError && (
+                <span style={{ color: "#ff4d4f", fontSize: 12 }}>
+                  {rawError}
+                </span>
+              )}
+            </div>
             <Input.TextArea
               value={yamlContent}
               onChange={handleTextAreaChange}
