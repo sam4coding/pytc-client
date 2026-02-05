@@ -15,9 +15,6 @@ RequireCommand 'uv' 'uv is required. Install it from https://docs.astral.sh/uv/.
 RequireCommand 'npm' 'npm is required to run the Electron client.'
 RequireCommand 'git' 'git is required to download pytorch_connectomics.'
 
-Write-Host 'Synchronizing Python environment with uv...'
-uv sync --python 3.11 --directory $rootDir
-
 Write-Host 'Preparing pytorch_connectomics dependency...'
 if (Test-Path (Join-Path $pytcDir '.git')) {
     Push-Location $pytcDir
@@ -34,6 +31,9 @@ if (Test-Path (Join-Path $pytcDir '.git')) {
     git checkout '20ccfde'
     Pop-Location
 }
+
+Write-Host 'Synchronizing Python environment with uv...'
+uv sync --python 3.11 --directory $rootDir
 
 Write-Host 'Installing frontend dependencies...'
 Push-Location $clientDir
