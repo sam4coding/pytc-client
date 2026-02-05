@@ -1,7 +1,6 @@
-// global localStorage
 import React, { useContext, useState } from "react";
 import { Button, Space } from "antd";
-import { startModelInference, stopModelInference } from "../utils/api";
+import { startModelInference, stopModelInference } from "../api";
 import Configurator from "../components/Configurator";
 import { AppContext } from "../contexts/GlobalContext";
 
@@ -10,6 +9,7 @@ function ModelInference({ isInferring, setIsInferring }) {
   // const [isInference, setIsInference] = useState(false)
   const handleStartButton = async () => {
     try {
+      setIsInferring(true);
       const inferenceConfig = localStorage.getItem("inferenceConfig");
 
       const getPath = (val) => {
@@ -24,13 +24,11 @@ function ModelInference({ isInferring, setIsInferring }) {
         inferenceConfig,
         getPath(context.outputPath),
         getPath(context.checkpointPath),
-      ); // inputs, configurationYaml
+      );
       console.log(res);
     } catch (e) {
       console.log(e);
-    } finally {
-      // setIsInference(true)
-      setIsInferring(true);
+      setIsInferring(false);
     }
   };
 
@@ -40,16 +38,11 @@ function ModelInference({ isInferring, setIsInferring }) {
     } catch (e) {
       console.log(e);
     } finally {
-      // setIsInference(false)
       setIsInferring(false);
     }
   };
 
-  // const [componentSize, setComponentSize] = useState("default");
   const [componentSize] = useState("default");
-  // const onFormLayoutChange = ({ size }) => {
-  //   setComponentSize(size);
-  // };
 
   return (
     <>
@@ -59,6 +52,7 @@ function ModelInference({ isInferring, setIsInferring }) {
           <Button
             onClick={handleStartButton}
             disabled={isInferring} // Disables the button when inference is running
+            style={{ marginRight: "8px" }}
           >
             Start Inference
           </Button>

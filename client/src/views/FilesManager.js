@@ -21,7 +21,7 @@ import {
   EyeOutlined,
   LayoutOutlined,
 } from "@ant-design/icons";
-import apiClient from "../services/apiClient";
+import { apiClient } from "../api";
 import FileTreeSidebar from "../components/FileTreeSidebar";
 
 // Transform backend file list into UI state
@@ -133,7 +133,7 @@ function FilesManager() {
           setServerUnavailable(true);
           if (!hasShownServerWarning) {
             setHasShownServerWarning(true);
-            message.warning('API server is not available yet. Retrying...');
+            message.warning("API server is not available yet. Retrying...");
           }
         }
         // Only show error if component is mounted and it's not an auth error
@@ -987,7 +987,15 @@ function FilesManager() {
       }}
     >
       {serverUnavailable && (
-        <div style={{ position: "absolute", top: 80, left: 24, right: 24, zIndex: 10 }}>
+        <div
+          style={{
+            position: "absolute",
+            top: 80,
+            left: 24,
+            right: 24,
+            zIndex: 10,
+          }}
+        >
           <div
             style={{
               padding: 12,
@@ -996,7 +1004,8 @@ function FilesManager() {
               borderRadius: 8,
             }}
           >
-            API server is not ready yet. File list will load automatically when it comes online.
+            API server is not ready yet. File list will load automatically when
+            it comes online.
           </div>
         </div>
       )}

@@ -1,4 +1,3 @@
-// global localStorage
 import React, { useContext, useState } from "react";
 import { Button, message, Steps, theme } from "antd";
 import YamlFileUploader from "./YamlFileUploader";
@@ -61,7 +60,7 @@ function Configurator(props) {
       <div style={contentStyle}>{items[current].content}</div>
       <div style={{ marginTop: 24 }}>
         {current > 0 && (
-          <Button style={{ margin: "0 8px" }} onClick={() => prev()}>
+          <Button style={{ marginRight: "8px" }} onClick={() => prev()}>
             Previous
           </Button>
         )}

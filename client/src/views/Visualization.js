@@ -6,7 +6,7 @@ import {
   ReloadOutlined,
 } from "@ant-design/icons";
 import { AppContext } from "../contexts/GlobalContext";
-import { getNeuroglancerViewer } from "../utils/api";
+import { getNeuroglancerViewer } from "../api";
 import UnifiedFileInput from "../components/UnifiedFileInput";
 
 const { Title } = Typography;

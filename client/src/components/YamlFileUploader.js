@@ -5,7 +5,7 @@ import { UploadOutlined } from "@ant-design/icons";
 import yaml from "js-yaml";
 import { AppContext } from "../contexts/GlobalContext";
 import { YamlContext } from "../contexts/YamlContext";
-import { findCommonPartOfString } from "../utils/utils";
+import { findCommonPartOfString } from "../utils";
 
 const YamlFileUploader = (props) => {
   const context = useContext(AppContext);

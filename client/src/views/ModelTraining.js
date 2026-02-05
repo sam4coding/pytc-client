@@ -5,7 +5,7 @@ import {
   startModelTraining,
   stopModelTraining,
   getTrainingStatus,
-} from "../utils/api";
+} from "../api";
 import Configurator from "../components/Configurator";
 import { AppContext } from "../contexts/GlobalContext";
 

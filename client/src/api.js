@@ -1,9 +1,13 @@
 import axios from "axios";
 import { message } from "antd";
 
-// TODO: Add proper environment configuration
-const API_PROTOCOL = process.env.REACT_APP_API_PROTOCOL || "http";
-const API_URL = process.env.REACT_APP_API_URL || "localhost:4242";
+const BASE_URL = `${process.env.REACT_APP_SERVER_PROTOCOL || "http"}://${process.env.REACT_APP_SERVER_URL || "localhost:4242"}`;
+
+// Create axios instance without auth headers—app runs as guest by default.
+export const apiClient = axios.create({
+  baseURL: BASE_URL,
+  withCredentials: true,
+});
 
 const buildFilePath = (file) => {
   if (!file) return "";
@@ -20,7 +24,7 @@ const hasBrowserFile = (file) => file && file.originFileObj instanceof File;
 
 export async function getNeuroglancerViewer(image, label, scales) {
   try {
-    const url = `${API_PROTOCOL}://${API_URL}/neuroglancer`;
+    const url = `${BASE_URL}/neuroglancer`;
     if (hasBrowserFile(image)) {
       const formData = new FormData();
       formData.append(
@@ -56,7 +60,7 @@ export async function getNeuroglancerViewer(image, label, scales) {
 
 export async function checkFile(file) {
   try {
-    const url = `${API_PROTOCOL}://${API_URL}/check_files`;
+    const url = `${BASE_URL}/check_files`;
     const data = JSON.stringify({
       folderPath: file.folderPath || "",
       name: file.name,
@@ -72,8 +76,7 @@ export async function checkFile(file) {
 function handleError(error) {
   if (error.response) {
     const detail = error.response.data?.detail;
-    const detailMessage =
-      typeof detail === "string" ? detail : detail?.data;
+    const detailMessage = typeof detail === "string" ? detail : detail?.data;
     throw new Error(
       `${error.response.status}: ${detailMessage || error.response.statusText}`,
     );
@@ -83,7 +86,7 @@ function handleError(error) {
 
 export async function makeApiRequest(url, method, data = null) {
   try {
-    const fullUrl = `${API_PROTOCOL}://${API_URL}/${url}`;
+    const fullUrl = `${BASE_URL}/${url}`;
     const config = {
       method,
       url: fullUrl,
@@ -149,11 +152,6 @@ export async function startModelTraining(trainingConfig, logPath, outputPath) {
     }
 
     const data = JSON.stringify({
-      arguments: {
-        // nproc_per_node: 4,
-        // master_port: 2345,
-        // distributed: "",
-      },
       logPath, // Keep for backwards compatibility, but won't be used for TensorBoard
       outputPath, // TensorBoard will use this instead
       trainingConfig: configToSend,
@@ -171,7 +169,7 @@ export async function startModelTraining(trainingConfig, logPath, outputPath) {
 
 export async function stopModelTraining() {
   try {
-    await axios.post(`${API_PROTOCOL}://${API_URL}/stop_model_training`);
+    await axios.post(`${BASE_URL}/stop_model_training`);
   } catch (error) {
     handleError(error);
   }
@@ -179,29 +177,13 @@ export async function stopModelTraining() {
 
 export async function getTrainingStatus() {
   try {
-    const res = await axios.get(`${API_PROTOCOL}://${API_URL}/training_status`);
+    const res = await axios.get(`${BASE_URL}/training_status`);
     return res.data;
   } catch (error) {
     console.error("Failed to get training status:", error);
     return { isRunning: false, error: true };
   }
 }
-
-// export async function startTensorboard() {
-//   try {
-//     const res = await axios.get(
-//       `${process.env.REACT_APP_API_PROTOCOL}://${process.env.REACT_APP_API_URL}/start_tensorboard`
-//     );
-//     return res.data;
-//   } catch (error) {
-//     if (error.response) {
-//       throw new Error(
-//         `${error.response.status}: ${error.response.data?.detail?.error}`
-//       );
-//     }
-//     throw error;
-//   }
-// }
 
 export async function getTensorboardURL() {
   return makeApiRequest("get_tensorboard_url", "get");
@@ -333,9 +315,7 @@ export async function startModelInference(
 
 export async function getInferenceStatus() {
   try {
-    const res = await axios.get(
-      `${API_PROTOCOL}://${API_URL}/inference_status`,
-    );
+    const res = await axios.get(`${BASE_URL}/inference_status`);
     return res.data;
   } catch (error) {
     console.error("Failed to get inference status:", error);
@@ -345,7 +325,7 @@ export async function getInferenceStatus() {
 
 export async function stopModelInference() {
   try {
-    await axios.post(`${API_PROTOCOL}://${API_URL}/stop_model_inference`);
+    await axios.post(`${BASE_URL}/stop_model_inference`);
   } catch (error) {
     handleError(error);
   }
@@ -353,10 +333,7 @@ export async function stopModelInference() {
 
 export async function queryChatBot(query) {
   try {
-    const res = await axios.post(
-      `${API_PROTOCOL}://${API_URL}/chat/query`,
-      { query },
-    );
+    const res = await axios.post(`${BASE_URL}/chat/query`, { query });
     return res.data?.response;
   } catch (error) {
     handleError(error);
@@ -365,9 +342,7 @@ export async function queryChatBot(query) {
 
 export async function clearChat() {
   try {
-    await axios.post(
-      `${API_PROTOCOL}://${API_URL}/chat/clear`,
-    );
+    await axios.post(`${BASE_URL}/chat/clear`);
   } catch (error) {
     handleError(error);
   }

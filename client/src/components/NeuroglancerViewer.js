@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Button, Spin, Alert, Typography } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
-import apiClient from "../services/apiClient";
+import { apiClient } from "../api";
 
 const { Text, Title } = Typography;
 
