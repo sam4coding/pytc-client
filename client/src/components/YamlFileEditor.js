@@ -80,6 +80,7 @@ const CONTROL_SECTIONS = {
       controls: [
         { label: "Optimizer", path: ["SOLVER", "NAME"], type: "select", options: ["SGD", "Adam", "AdamW"] },
         { label: "LR scheduler", path: ["SOLVER", "LR_SCHEDULER_NAME"], type: "select", options: ["MultiStepLR", "CosineAnnealingLR", "StepLR"] },
+        { label: "Learning rate", path: ["SOLVER", "BASE_LR"], type: "number", min: 0, step: 0.0001 },
         { label: "Total iterations", path: ["SOLVER", "ITERATION_TOTAL"], type: "number", min: 1 },
         { label: "Save interval", path: ["SOLVER", "ITERATION_SAVE"], type: "number", min: 1 },
         { label: "Validation interval", path: ["SOLVER", "ITERATION_VAL"], type: "number", min: 1 },
@@ -218,9 +219,9 @@ const YamlFileEditor = (props) => {
   const sections = CONTROL_SECTIONS[type] || [];
 
   return (
-    <div>
+    <div style={{ padding: "12px 16px" }}>
       {displayName && (
-        <div style={{ marginBottom: 8 }}>
+        <div style={{ marginBottom: 12 }}>
           <h3 style={{ marginBottom: 8 }}>{displayName}</h3>
         </div>
       )}
@@ -238,8 +239,8 @@ const YamlFileEditor = (props) => {
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                  gap: 12,
+                  gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                  gap: 16,
                 }}
               >
                 {section.controls.map((control) => (
@@ -247,10 +248,10 @@ const YamlFileEditor = (props) => {
                     key={control.path.join(".")}
                     style={{
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
+                      flexDirection: "column",
+                      alignItems: "flex-start",
                       gap: 12,
-                      padding: "6px 8px",
+                      padding: "8px 10px",
                       border: "1px solid #f0f0f0",
                       borderRadius: 8,
                     }}
@@ -264,7 +265,7 @@ const YamlFileEditor = (props) => {
                     >
                       <span style={{ fontSize: 13 }}>{control.label}</span>
                     </div>
-                    {renderControl(control)}
+                    <div style={{ width: "100%" }}>{renderControl(control)}</div>
                   </div>
                 ))}
               </div>

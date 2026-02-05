@@ -125,10 +125,7 @@ export const ContextWrapper = (props) => {
     "uploadedYamlFile",
     "",
   );
-  const [selectedYamlPreset, setSelectedYamlPreset] = usePersistedState(
-    "selectedYamlPreset",
-    null,
-  );
+  const [selectedYamlPreset, setSelectedYamlPreset] = useState(null);
   const [imageFileList, setImageFileList] = usePersistedState(
     "imageFileList",
     [],

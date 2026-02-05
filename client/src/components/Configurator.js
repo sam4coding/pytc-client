@@ -20,7 +20,8 @@ function Configurator(props) {
   };
 
   const handleDoneButton = () => {
-    message.success("Processing complete!");
+    const label = type === "training" ? "Training" : "Inference";
+    message.success(`${label} configuration saved.`);
     if (type === "training") {
       localStorage.setItem("trainingConfig", context.trainingConfig);
     } else {

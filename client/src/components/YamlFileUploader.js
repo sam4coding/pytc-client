@@ -37,6 +37,16 @@ const YamlFileUploader = (props) => {
     if (type === "training") {
       return [
         {
+          label: "Batch size",
+          min: 1,
+          max: 32,
+          marks: { 1: 1, 8: 8, 16: 16, 32: 32 },
+          value: YAMLContext.solverSamplesPerBatch,
+          location: "SOLVER",
+          property: "SAMPLES_PER_BATCH",
+          step: 1,
+        },
+        {
           label: "GPUs",
           min: 0,
           max: 8,
@@ -56,40 +66,10 @@ const YamlFileUploader = (props) => {
           property: "NUM_CPUS",
           step: 1,
         },
-        {
-          label: "Learning rate",
-          min: 0.00001,
-          max: 0.1,
-          marks: { 0.00001: 0.00001, 0.01: 0.01, 0.1: 0.1 },
-          value: YAMLContext.learningRate,
-          location: "SOLVER",
-          property: "BASE_LR",
-          step: 0.00001,
-        },
-        {
-          label: "Batch size",
-          min: 1,
-          max: 32,
-          marks: { 1: 1, 8: 8, 16: 16, 32: 32 },
-          value: YAMLContext.solverSamplesPerBatch,
-          location: "SOLVER",
-          property: "SAMPLES_PER_BATCH",
-          step: 1,
-        },
       ];
     }
 
     return [
-      {
-        label: "Augmentations",
-        min: 1,
-        max: 16,
-        marks: { 1: 1, 8: 8, 16: 16 },
-        value: YAMLContext.augNum,
-        location: "INFERENCE",
-        property: "AUG_NUM",
-        step: 1,
-      },
       {
         label: "Batch size",
         min: 1,
@@ -100,12 +80,21 @@ const YamlFileUploader = (props) => {
         property: "SAMPLES_PER_BATCH",
         step: 1,
       },
+      {
+        label: "Augmentations",
+        min: 1,
+        max: 16,
+        marks: { 1: 1, 8: 8, 16: 16 },
+        value: YAMLContext.augNum,
+        location: "INFERENCE",
+        property: "AUG_NUM",
+        step: 1,
+      },
     ];
   }, [
     type,
     YAMLContext.numGPUs,
     YAMLContext.numCPUs,
-    YAMLContext.learningRate,
     YAMLContext.solverSamplesPerBatch,
     YAMLContext.augNum,
     YAMLContext.inferenceSamplesPerBatch,
@@ -259,6 +248,7 @@ const YamlFileUploader = (props) => {
     if (!yamlData) return;
     applyYamlData(yamlData);
   };
+
 
   const handleArchitectureChange = (value) => {
     const yamlData = updateYamlValue("MODEL", "ARCHITECTURE", value);
