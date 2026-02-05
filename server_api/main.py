@@ -452,7 +452,9 @@ async def chat_query(req: Request):
         raise HTTPException(status_code=503, detail=detail)
     body = await req.json()
     query = body.get("query")
-    response = chain.invoke({"question": query})["answer"]
+    result = chain.invoke({"messages": [{"role": "user", "content": query}]})
+    messages = result.get("messages", [])
+    response = messages[-1].content if messages else "No response generated"
     return {"response": response}
 
 
@@ -463,7 +465,8 @@ async def clear_chat():
         if "_chatbot_error" in globals():
             detail = f"{detail}: {_chatbot_error}"
         raise HTTPException(status_code=503, detail=detail)
-    memory.clear()
+    if memory is not None:
+        memory.clear()
     return {"message": "Chat history cleared"}
 
 

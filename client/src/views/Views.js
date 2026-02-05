@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Layout, Menu, message, Button, Drawer } from "antd";
 import {
   FolderOpenOutlined,
@@ -35,6 +35,8 @@ function Views() {
   const [workflowModalVisible, setWorkflowModalVisible] = useState(false);
   const [isManualChange, setIsManualChange] = useState(false); // Flag for "Change Startup Mode"
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatWidth, setChatWidth] = useState(380);
+  const isResizing = useRef(false);
   const [apiReady, setApiReady] = useState(false);
   const [hasShownApiWarning, setHasShownApiWarning] = useState(false);
 
@@ -266,6 +268,33 @@ function Views() {
     };
   }, [current]);
 
+  const startResizing = useCallback((e) => {
+    isResizing.current = true;
+    e.preventDefault();
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    isResizing.current = false;
+  }, []);
+
+  const resize = useCallback((e) => {
+    if (isResizing.current) {
+      const newWidth = window.innerWidth - e.clientX;
+      if (newWidth >= 280 && newWidth <= 800) {
+        setChatWidth(newWidth);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [resize, stopResizing]);
+
   const renderTabContent = (key, component) => {
     if (!visitedTabs.has(key)) return null;
     return (
@@ -350,12 +379,27 @@ function Views() {
         placement="right"
         open={isChatOpen}
         onClose={() => setIsChatOpen(false)}
-        width={380}
+        width={chatWidth}
         mask={false}
         closable={false}
         destroyOnClose
         styles={{ header: { display: 'none' }, body: { padding: 0 } }}
       >
+        <div
+          onMouseDown={startResizing}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: '4px',
+            cursor: 'ew-resize',
+            backgroundColor: 'transparent',
+            zIndex: 10,
+          }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1890ff'}
+          onMouseLeave={(e) => !isResizing.current && (e.currentTarget.style.backgroundColor = 'transparent')}
+        />
         <Chatbot onClose={() => setIsChatOpen(false)} />
       </Drawer>
     </Layout>
