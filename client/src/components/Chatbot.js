@@ -3,6 +3,7 @@ import { Button, Input, List, Typography, Space, Spin, Popconfirm } from "antd";
 import { SendOutlined, CloseOutlined, DeleteOutlined } from "@ant-design/icons";
 import { queryChatBot, clearChat } from "../api";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const { TextArea } = Input;
 const { Text } = Typography;
@@ -155,6 +156,7 @@ function Chatbot({ onClose }) {
                     <Text style={{ color: "white" }}>{message.text}</Text>
                   ) : (
                     <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
                       components={{
                         ul: ({ children }) => (
                           <ul style={{ paddingLeft: "20px", margin: "8px 0" }}>
