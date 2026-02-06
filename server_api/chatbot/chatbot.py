@@ -6,6 +6,7 @@ Architecture:
 - Inference Agent: Handles checkpoint listing and inference command generation
 - RAG: Documentation search via FAISS vector store
 """
+
 import os
 
 from langchain_ollama import OllamaEmbeddings, ChatOllama
@@ -145,10 +146,10 @@ def build_chain():
         """
         Search PyTC documentation for how-to guides, UI explanations, and feature descriptions.
         Use this for questions about the application interface or general usage.
-        
+
         Args:
             query: The user's question
-            
+
         Returns:
             Relevant documentation content
         """
@@ -162,16 +163,16 @@ def build_chain():
         """
         Delegate a training-related task to the Training Agent.
         Use this for: config selection, training setup, hyperparameter questions.
-        
+
         Args:
             task: Description of what the training agent should do
-        
+
         Returns:
             Response from the training agent
         """
-        result = training_agent.invoke({
-            "messages": [{"role": "user", "content": task}]
-        })
+        result = training_agent.invoke(
+            {"messages": [{"role": "user", "content": task}]}
+        )
         messages = result.get("messages", [])
         return messages[-1].content if messages else "Training agent did not respond."
 
@@ -180,16 +181,16 @@ def build_chain():
         """
         Delegate an inference/evaluation task to the Inference Agent.
         Use this for: checkpoint listing, inference commands, evaluation setup.
-        
+
         Args:
             task: Description of what the inference agent should do
-        
+
         Returns:
             Response from the inference agent
         """
-        result = inference_agent.invoke({
-            "messages": [{"role": "user", "content": task}]
-        })
+        result = inference_agent.invoke(
+            {"messages": [{"role": "user", "content": task}]}
+        )
         messages = result.get("messages", [])
         return messages[-1].content if messages else "Inference agent did not respond."
 

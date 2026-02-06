@@ -264,11 +264,11 @@ function Views() {
   }, []);
 
   useEffect(() => {
-    window.addEventListener('mousemove', resize);
-    window.addEventListener('mouseup', stopResizing);
+    window.addEventListener("mousemove", resize);
+    window.addEventListener("mouseup", stopResizing);
     return () => {
-      window.removeEventListener('mousemove', resize);
-      window.removeEventListener('mouseup', stopResizing);
+      window.removeEventListener("mousemove", resize);
+      window.removeEventListener("mouseup", stopResizing);
     };
   }, [resize, stopResizing]);
 
@@ -358,17 +358,22 @@ function Views() {
         <div
           onMouseDown={startResizing}
           style={{
-            position: 'absolute',
+            position: "absolute",
             left: 0,
             top: 0,
             bottom: 0,
-            width: '4px',
-            cursor: 'ew-resize',
-            backgroundColor: 'transparent',
+            width: "4px",
+            cursor: "ew-resize",
+            backgroundColor: "transparent",
             zIndex: 10,
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#1890ff'}
-          onMouseLeave={(e) => !isResizing.current && (e.currentTarget.style.backgroundColor = 'transparent')}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "#1890ff")
+          }
+          onMouseLeave={(e) =>
+            !isResizing.current &&
+            (e.currentTarget.style.backgroundColor = "transparent")
+          }
         />
         <Chatbot onClose={() => setIsChatOpen(false)} />
       </Drawer>
