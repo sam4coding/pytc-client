@@ -16,6 +16,7 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width,
     height,
+    icon: path.join(__dirname, "public", "favicon.ico"),
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
