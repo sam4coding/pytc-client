@@ -29,6 +29,12 @@ scripts/start.sh          # macOS / Linux
 scripts\start.ps1         # Windows
 ```
 
+If restarting after a crash or interrupted session, kill any lingering processes first:
+
+```
+lsof -ti:8000 | xargs kill -9   # macOS / Linux
+```
+
 ## Before pushing changes
 
 Format most code with `prettier`:

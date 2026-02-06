@@ -157,11 +157,83 @@ function Chatbot({ onClose }) {
                     <ReactMarkdown
                       components={{
                         ul: ({ children }) => (
-                          <ul style={{ paddingLeft: "20px" }}>{children}</ul>
+                          <ul style={{ paddingLeft: "20px", margin: "8px 0" }}>
+                            {children}
+                          </ul>
                         ),
                         ol: ({ children }) => (
-                          <ol style={{ paddingLeft: "20px" }}>{children}</ol>
+                          <ol style={{ paddingLeft: "20px", margin: "8px 0" }}>
+                            {children}
+                          </ol>
                         ),
+                        table: ({ children }) => (
+                          <div style={{ overflowX: "auto", margin: "8px 0" }}>
+                            <table
+                              style={{
+                                borderCollapse: "collapse",
+                                width: "100%",
+                                fontSize: "13px",
+                              }}
+                            >
+                              {children}
+                            </table>
+                          </div>
+                        ),
+                        thead: ({ children }) => (
+                          <thead style={{ backgroundColor: "#e8e8e8" }}>
+                            {children}
+                          </thead>
+                        ),
+                        th: ({ children }) => (
+                          <th
+                            style={{
+                              border: "1px solid #ddd",
+                              padding: "6px 8px",
+                              textAlign: "left",
+                              fontWeight: 600,
+                            }}
+                          >
+                            {children}
+                          </th>
+                        ),
+                        td: ({ children }) => (
+                          <td
+                            style={{
+                              border: "1px solid #ddd",
+                              padding: "6px 8px",
+                            }}
+                          >
+                            {children}
+                          </td>
+                        ),
+                        code: ({ inline, children }) =>
+                          inline ? (
+                            <code
+                              style={{
+                                backgroundColor: "#e8e8e8",
+                                padding: "2px 4px",
+                                borderRadius: "3px",
+                                fontSize: "12px",
+                              }}
+                            >
+                              {children}
+                            </code>
+                          ) : (
+                            <pre
+                              style={{
+                                backgroundColor: "#1e1e1e",
+                                color: "#d4d4d4",
+                                padding: "8px",
+                                borderRadius: "4px",
+                                overflowX: "auto",
+                                fontSize: "12px",
+                                margin: "8px 0",
+                              }}
+                            >
+                              <code>{children}</code>
+                            </pre>
+                          ),
+                        pre: ({ children }) => <>{children}</>,
                       }}
                     >
                       {message.text}
