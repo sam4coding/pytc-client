@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Button, Input, List, Typography, Space, Spin, Popconfirm } from "antd";
 import { SendOutlined, CloseOutlined, DeleteOutlined } from "@ant-design/icons";
-import { queryChatBot, clearChat } from "../utils/api";
+import { queryChatBot, clearChat } from "../api";
 import ReactMarkdown from "react-markdown";
 
 const { TextArea } = Input;
@@ -9,7 +9,7 @@ const { Text } = Typography;
 const initialMessage = [
   {
     id: 1,
-    text: "Hello! I'm your AI assistant. How can I help you today?",
+    text: "Hello! I'm your AI assistant, built to help you navigate PyTC Client. How can I help you today?",
     isUser: false,
   },
 ];

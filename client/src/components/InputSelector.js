@@ -50,7 +50,11 @@ function InputSelector(props) {
             placeholder="Please select or input image path"
             onChange={handleImageChange}
             value={getValue(context.inputImage)}
-            selectionType={type === 'training' || type === 'inference' ? 'fileOrDirectory' : 'file'}
+            selectionType={
+              type === "training" || type === "inference"
+                ? "fileOrDirectory"
+                : "file"
+            }
           />
         </Form.Item>
         <Form.Item label="Input Label">
@@ -58,7 +62,11 @@ function InputSelector(props) {
             placeholder="Please select or input label path"
             onChange={handleLabelChange}
             value={getValue(context.inputLabel)}
-            selectionType={type === 'training' || type === 'inference' ? 'fileOrDirectory' : 'file'}
+            selectionType={
+              type === "training" || type === "inference"
+                ? "fileOrDirectory"
+                : "file"
+            }
           />
         </Form.Item>
         {type === "training" ? (

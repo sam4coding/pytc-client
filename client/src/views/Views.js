@@ -2,13 +2,11 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Layout, Menu, message, Button, Drawer } from "antd";
 import {
   FolderOpenOutlined,
-  DesktopOutlined,
   EyeOutlined,
   ExperimentOutlined,
   ThunderboltOutlined,
   DashboardOutlined,
   BugOutlined,
-  ReadOutlined,
   ApartmentOutlined,
   MessageOutlined,
 } from "@ant-design/icons";
@@ -21,7 +19,7 @@ import ProofReading from "./ProofReading";
 import WormErrorHandling from "./WormErrorHandling";
 import WorkflowSelector from "../components/WorkflowSelector";
 import Chatbot from "../components/Chatbot";
-import apiClient from "../services/apiClient";
+import { apiClient } from "../api";
 
 const { Content } = Layout;
 
@@ -33,7 +31,6 @@ function Views() {
   const [visibleTabs, setVisibleTabs] = useState(new Set(["files"]));
   const [visitedTabs, setVisitedTabs] = useState(new Set(["files"]));
   const [workflowModalVisible, setWorkflowModalVisible] = useState(false);
-  const [isManualChange, setIsManualChange] = useState(false); // Flag for "Change Startup Mode"
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatWidth, setChatWidth] = useState(380);
   const isResizing = useRef(false);
@@ -95,52 +92,51 @@ function Views() {
 
   const checkPreference = async (isMounted) => {
     try {
-      const res = await apiClient.get('/files')
-      const fileList = res.data || []
+      const res = await apiClient.get("/files");
+      const fileList = res.data || [];
 
       // Find saved preference file
-      const prefFile = fileList.find(f => f.name === PREF_FILE_NAME && !f.is_folder)
+      const prefFile = fileList.find(
+        (f) => f.name === PREF_FILE_NAME && !f.is_folder,
+      );
 
       if (prefFile && prefFile.physical_path) {
         try {
-          let pathForUrl = prefFile.physical_path.replace(/\\/g, '/')
-          if (pathForUrl.includes('uploads/')) {
-            const parts = pathForUrl.split('uploads/')
+          let pathForUrl = prefFile.physical_path.replace(/\\/g, "/");
+          if (pathForUrl.includes("uploads/")) {
+            const parts = pathForUrl.split("uploads/");
             if (parts.length > 1) {
-              pathForUrl = 'uploads/' + parts[parts.length - 1]
+              pathForUrl = "uploads/" + parts[parts.length - 1];
             }
           }
-          const fileUrl = `${apiClient.defaults.baseURL || 'http://localhost:4242'}/${pathForUrl}`
+          const fileUrl = `${apiClient.defaults.baseURL || "http://localhost:4242"}/${pathForUrl}`;
 
-          const contentRes = await fetch(fileUrl)
+          const contentRes = await fetch(fileUrl);
           if (contentRes.ok) {
-            const data = await contentRes.json()
+            const data = await contentRes.json();
             if (data) {
-              const modes = data.modes || data.mode
+              const modes = data.modes || data.mode;
               if (modes) {
-                applyModes(modes)
-                return
+                applyModes(modes);
+                return;
               }
             }
           }
         } catch (err) {
-          console.error('Error reading pref file content', err)
+          console.error("Error reading pref file content", err);
         }
       }
 
       // If no file found or error reading it, show selector (Initial Launch)
       if (isMounted) {
-        setWorkflowModalVisible(true)
-        setIsManualChange(false)
+        setWorkflowModalVisible(true);
       }
-
     } catch (err) {
       if (isMounted) {
-        setWorkflowModalVisible(true)
-        setIsManualChange(false)
+        setWorkflowModalVisible(true);
       }
     }
-  }
+  };
 
   // Wait for API readiness before loading preferences
   useEffect(() => {
@@ -173,20 +169,15 @@ function Views() {
     };
   }, [hasShownApiWarning]);
 
-  const handleWorkflowSelect = async (modes, remember) => {
+  const handleWorkflowSelect = async (modes) => {
     setWorkflowModalVisible(false);
-
-    // Render logic: Only if NOT manual change
-    if (!isManualChange) {
-      applyModes(modes);
-    }
+    applyModes(modes);
 
     // Persistence Logic
     try {
       if (!apiReady) {
-        message.warning('API server is not ready. Preference was not saved.')
-        setIsManualChange(false)
-        return
+        message.warning("API server is not ready. Preference was not saved.");
+        return;
       }
       // 1. Always delete existing to avoid staleness or duplicates
       const res = await apiClient.get("/files");
@@ -197,37 +188,25 @@ function Views() {
         await apiClient.delete(`/files/${f.id}`);
       }
 
-      // 2. If Remember is checked, Save new
-      if (remember) {
-        const jsonContent = JSON.stringify({ modes });
-        const blob = new Blob([jsonContent], { type: "application/json" });
-        const file = new File([blob], PREF_FILE_NAME, {
-          type: "application/json",
-        });
+      // Save new preferences
+      const jsonContent = JSON.stringify({ modes });
+      const blob = new Blob([jsonContent], { type: "application/json" });
+      const file = new File([blob], PREF_FILE_NAME, {
+        type: "application/json",
+      });
 
-        const formData = new FormData();
-        formData.append("file", file);
-        formData.append("path", "root");
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("path", "root");
 
-        await apiClient.post("/files/upload", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        if (isManualChange) {
-          message.success("Preferences saved for next launch");
-        }
-      } else {
-        // Remember is UNCHECKED
-        if (isManualChange) {
-          message.info("Startup preference cleared");
-        }
-      }
+      await apiClient.post("/files/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      message.success("Preferences saved");
     } catch (err) {
-      console.error("Failed to update preference", err);
-      message.error("Failed to update preference");
+      console.error("Failed to update preferences", err);
+      message.error("Failed to update preferences");
     }
-
-    // Reset manual flag
-    setIsManualChange(false);
   };
 
   // IPC Listener
@@ -239,7 +218,7 @@ function Views() {
       return;
     }
 
-    const handleToggleTab = (event, key, checked) => {
+    const handleToggleTab = (_event, key, checked) => {
       setVisibleTabs((prev) => {
         const newSet = new Set(prev);
         if (checked) {
@@ -252,19 +231,17 @@ function Views() {
       });
     };
 
-    const handleResetPreference = () => {
-      // User clicked "Change Startup Mode"
-      // We set isManualChange = true, so selecting doesn't render immediately
-      setIsManualChange(true);
+    const handleChangeViews = () => {
+      // User clicked "Change Views"
       setWorkflowModalVisible(true);
     };
 
     ipcRenderer.on("toggle-tab", handleToggleTab);
-    ipcRenderer.on("reset-preference", handleResetPreference);
+    ipcRenderer.on("change-views", handleChangeViews);
 
     return () => {
       ipcRenderer.removeListener("toggle-tab", handleToggleTab);
-      ipcRenderer.removeListener("reset-preference", handleResetPreference);
+      ipcRenderer.removeListener("change-views", handleChangeViews);
     };
   }, [current]);
 
@@ -313,14 +290,7 @@ function Views() {
         onSelect={handleWorkflowSelect}
         onCancel={() => {
           setWorkflowModalVisible(false);
-          setIsManualChange(false);
-          // If initial launch and cancelled, maybe just files?
-          if (!isManualChange && visitedTabs.size <= 1) {
-            // simple heuristic
-            // already files by default
-          }
         }}
-        isManual={isManualChange}
       />
 
       <div
@@ -383,7 +353,7 @@ function Views() {
         mask={false}
         closable={false}
         destroyOnClose
-        styles={{ header: { display: 'none' }, body: { padding: 0 } }}
+        styles={{ header: { display: "none" }, body: { padding: 0 } }}
       >
         <div
           onMouseDown={startResizing}

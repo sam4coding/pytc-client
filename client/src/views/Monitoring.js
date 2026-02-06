@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getTensorboardURL } from "../utils/api";
+import { getTensorboardURL } from "../api";
 
 function Monitoring() {
   const [tensorboardURL, setTensorboardURL] = useState(null);
