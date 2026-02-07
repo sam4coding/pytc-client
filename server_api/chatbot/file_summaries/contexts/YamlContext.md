@@ -5,10 +5,12 @@ Context for YAML-related UI state (GPUs, batch size, etc.). Used by `YamlFileUpl
 ## State
 
 ### Training
+
 - `numGPUs`, `numCPUs`
 - `solverSamplesPerBatch`, `learningRate`
 
 ### Inference
+
 - `inferenceSamplesPerBatch`, `augNum`
 
 ## YamlContextWrapper

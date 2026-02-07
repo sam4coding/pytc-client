@@ -15,11 +15,13 @@ App
 ## Components
 
 ### `CacheBootstrapper`
+
 - Runs `resetFileState()` from `AppContext` on mount
 - Clears local cache (files, fileList, etc.) before rendering children
 - Renders nothing until cache is cleared; then renders main content
 
 ### `MainContent`
+
 - Renders `Views` component (main application layout with tabs)
 
 ## Contexts

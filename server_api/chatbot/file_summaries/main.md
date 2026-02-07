@@ -18,12 +18,14 @@ FastAPI server that powers the PyTC Client application. Provides API endpoints f
 ## Key Endpoints
 
 ### Health & Config
+
 - `GET /health` — Server status check
 - `GET /pytc/configs` — List PyTorch Connectomics config presets (YAML)
 - `GET /pytc/config?path=...` — Get config file content
 - `GET /pytc/architectures` — List model architectures from build.py
 
 ### Model Training & Inference
+
 - `POST /start_model_training` — Proxy to PyTC server (localhost:4243)
 - `POST /stop_model_training` — Stop training
 - `GET /training_status` — Training status polling
@@ -32,12 +34,15 @@ FastAPI server that powers the PyTC Client application. Provides API endpoints f
 - `GET /get_tensorboard_url` — Returns TensorBoard URL (default: localhost:6006)
 
 ### Visualization
+
 - `POST /neuroglancer` — Create Neuroglancer viewer for image/label volumes. Accepts JSON or multipart/form-data with image, label, scales.
 
 ### Data & Files
+
 - `POST /check_files` — Heuristic check if file is a label (integer type, low unique values, or binary)
 
 ### Chatbot (RAG)
+
 - `POST /chat/query` — Chat query (requires chatbot configured)
 - `POST /chat/clear` — Clear chat history
 - `GET /chat/status` — Check if chatbot is configured

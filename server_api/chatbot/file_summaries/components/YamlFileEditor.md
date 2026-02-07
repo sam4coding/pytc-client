@@ -9,6 +9,7 @@ Advanced YAML configuration editor with structured controls (switches, selects, 
 ## Sections (CONTROL_SECTIONS)
 
 ### Training
+
 - Common training knobs: Optimizer, LR scheduler, learning rate, batch size, iterations, save/validation intervals
 - System: Distributed, Parallel mode, Debug mode
 - Model: Block type, Backbone, Normalization, Activation, Pooling, Mixed precision, Aux output
@@ -16,6 +17,7 @@ Advanced YAML configuration editor with structured controls (switches, selects, 
 - Solver (advanced): Weight decay, Momentum, Clip gradients
 
 ### Inference
+
 - Common: Batch size, Augmentations, Blending, Eval mode
 - Advanced: Run singly, Unpad output, Augment mode, Test count
 
