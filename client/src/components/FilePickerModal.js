@@ -8,7 +8,11 @@ import {
 } from "@ant-design/icons";
 import { apiClient } from "../api";
 
-const HIDDEN_SYSTEM_FILES = new Set(["workflow_preference.json"]);
+const HIDDEN_SYSTEM_FILES = new Set([
+  "workflow_preference.json",
+  ".ds_store",
+  "thumbs.db",
+]);
 const IMAGE_EXTENSIONS = new Set([
   ".png",
   ".jpg",
@@ -31,6 +35,7 @@ const FilePickerModal = ({
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [previewStatus, setPreviewStatus] = useState({});
+  const [onlyImages, setOnlyImages] = useState(false);
   const previewBaseUrl =
     apiClient.defaults.baseURL || "http://localhost:4242";
 
@@ -40,6 +45,7 @@ const FilePickerModal = ({
   useEffect(() => {
     if (visible) {
       setCurrentPath("root");
+      setOnlyImages(false);
       loadAllData();
     }
   }, [visible]);
@@ -59,18 +65,23 @@ const FilePickerModal = ({
   // Derive items for current view
   useEffect(() => {
     const filtered = allData.filter((f) => {
-      if (!f.is_folder && HIDDEN_SYSTEM_FILES.has(f.name)) return false;
+      const nameLower = String(f.name || "").toLowerCase();
+      if (!f.is_folder && HIDDEN_SYSTEM_FILES.has(nameLower)) return false;
       if (currentPath === "root") return f.path === "root" || !f.path;
       return String(f.path) === currentPath;
     });
 
-    filtered.sort((a, b) => {
+    const filteredByType = onlyImages
+      ? filtered.filter((f) => f.is_folder || isImageFile(f))
+      : filtered;
+
+    filteredByType.sort((a, b) => {
       if (a.is_folder === b.is_folder) return a.name.localeCompare(b.name);
       return a.is_folder ? -1 : 1;
     });
 
-    setItems(filtered);
-  }, [currentPath, allData]);
+    setItems(filteredByType);
+  }, [currentPath, allData, onlyImages]);
 
   const getParentPath = () => {
     if (currentPath === "root") return null;
@@ -238,6 +249,13 @@ const FilePickerModal = ({
         >
           Upload from Local
         </Button>
+        <Button
+          type={onlyImages ? "primary" : "default"}
+          onClick={() => setOnlyImages((prev) => !prev)}
+          style={{ marginLeft: 8 }}
+        >
+          Images Only
+        </Button>
       </div>
 
       <div style={{ height: "400px", overflow: "auto" }}>
@@ -349,7 +367,28 @@ const FilePickerModal = ({
                       <FileOutlined style={{ fontSize: "20px" }} />
                     )
                   }
-                  title={item.name}
+                  title={
+                    <span>
+                      {item.name}
+                      {item.is_folder &&
+                        (item.path === "root" || !item.path) &&
+                        item.physical_path && (
+                          <span
+                            style={{
+                              marginLeft: 8,
+                              padding: "2px 6px",
+                              fontSize: 10,
+                              borderRadius: 10,
+                              background: "#f0f5ff",
+                              color: "#2f54eb",
+                              border: "1px solid #adc6ff",
+                            }}
+                          >
+                            Mounted
+                          </span>
+                        )}
+                    </span>
+                  }
                   description={item.size ? item.size : null}
                 />
               </List.Item>

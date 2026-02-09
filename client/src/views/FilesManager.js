@@ -25,7 +25,11 @@ import {
 import { apiClient } from "../api";
 import FileTreeSidebar from "../components/FileTreeSidebar";
 
-const HIDDEN_SYSTEM_FILES = new Set(["workflow_preference.json"]);
+const HIDDEN_SYSTEM_FILES = new Set([
+  "workflow_preference.json",
+  ".ds_store",
+  "thumbs.db",
+]);
 const IMAGE_EXTENSIONS = new Set([
   ".png",
   ".jpg",
@@ -42,7 +46,8 @@ const transformFiles = (fileList) => {
   const folders = [];
   const files = {};
   fileList.forEach((f) => {
-    if (!f.is_folder && HIDDEN_SYSTEM_FILES.has(f.name)) {
+    const nameLower = String(f.name || "").toLowerCase();
+    if (!f.is_folder && HIDDEN_SYSTEM_FILES.has(nameLower)) {
       return;
     }
     if (f.is_folder) {
@@ -62,6 +67,7 @@ const transformFiles = (fileList) => {
         size: f.size,
         type: f.type,
         is_folder: false,
+        physical_path: f.physical_path || null,
       });
     }
   });
@@ -502,14 +508,54 @@ function FilesManager() {
       const item = folder || file;
 
       if (item) {
+        const isMountedFolder =
+          !!folder && folder.parent === "root" && folder.physical_path;
+        let descendantFileCount = 0;
+        let descendantFolderCount = 0;
+        let descendantSizeKb = 0;
+
+        if (isMountedFolder) {
+          const queue = [folder.key];
+          while (queue.length) {
+            const parentId = queue.shift();
+            const childFolders = folders.filter((f) => f.parent === parentId);
+            descendantFolderCount += childFolders.length;
+            childFolders.forEach((f) => queue.push(f.key));
+
+            const childFiles = files[parentId] || [];
+            descendantFileCount += childFiles.length;
+            childFiles.forEach((f) => {
+              const sizeStr = String(f.size || "");
+              const match = sizeStr.match(/([0-9.]+)\s*(KB|MB|GB|B)/i);
+              if (match) {
+                const value = parseFloat(match[1]);
+                const unit = match[2].toUpperCase();
+                if (unit === "B") descendantSizeKb += value / 1024;
+                if (unit === "KB") descendantSizeKb += value;
+                if (unit === "MB") descendantSizeKb += value * 1024;
+                if (unit === "GB") descendantSizeKb += value * 1024 * 1024;
+              }
+            });
+          }
+        }
+
+        const totalSizeStr = isMountedFolder
+          ? descendantSizeKb > 1024
+            ? `${(descendantSizeKb / 1024).toFixed(2)} MB`
+            : `${descendantSizeKb.toFixed(2)} KB`
+          : item.size || "N/A";
+
         setPropertiesData({
           type: "single",
           name: item.title || item.name,
           isFolder: !!folder,
-          size: item.size || "N/A",
+          size: totalSizeStr,
           fileType: item.type || "Folder",
           created: new Date().toLocaleString(), // Backend should provide this
           modified: new Date().toLocaleString(), // Backend should provide this
+          fileCount: isMountedFolder ? descendantFileCount : undefined,
+          folderCount: isMountedFolder ? descendantFolderCount : undefined,
+          isMountedFolder,
         });
       }
     } else {
@@ -921,6 +967,24 @@ function FilesManager() {
         ) : (
           <div style={{ wordBreak: "break-word", fontSize: 12 }}>
             {item.title || item.name}
+            {type === "folder" &&
+              item.parent === "root" &&
+              item.physical_path && (
+                <span
+                  style={{
+                    display: "inline-block",
+                    marginLeft: 6,
+                    padding: "2px 6px",
+                    fontSize: 10,
+                    borderRadius: 10,
+                    background: "#f0f5ff",
+                    color: "#2f54eb",
+                    border: "1px solid #adc6ff",
+                  }}
+                >
+                  Mounted
+                </span>
+              )}
           </div>
         )}
       </div>
@@ -1018,6 +1082,26 @@ function FilesManager() {
         danger: true,
         icon: <FolderOpenOutlined />,
       });
+    }
+    if (selectedItems.length === 1) {
+      const selectedFile = Object.values(files)
+        .flat()
+        .find((f) => f.key === selectedKey);
+      const selectedFolder = folders.find((f) => f.key === selectedKey);
+      const hasPhysicalPath =
+        (selectedFile &&
+          selectedFile.physical_path &&
+          selectedFile.physical_path.startsWith("/")) ||
+        (selectedFolder &&
+          selectedFolder.physical_path &&
+          selectedFolder.physical_path.startsWith("/"));
+      if (hasPhysicalPath) {
+        items.push({
+          key: "reveal_in_finder",
+          label: "Open in Finder",
+          icon: <FolderOpenOutlined />,
+        });
+      }
     }
     items.push(
       {
@@ -1136,6 +1220,25 @@ function FilesManager() {
         }
       },
     });
+  };
+
+  const handleRevealInFinder = (key) => {
+    const item =
+      folders.find((f) => f.key === key) ||
+      Object.values(files)
+        .flat()
+        .find((f) => f.key === key);
+    if (!item || !item.physical_path || !item.physical_path.startsWith("/")) {
+      message.warning("This item is not linked to a local file.");
+      return;
+    }
+    try {
+      const { ipcRenderer } = window.require("electron");
+      ipcRenderer.invoke("reveal-in-finder", item.physical_path);
+    } catch (err) {
+      console.error("Reveal in Finder error", err);
+      message.error("Failed to open in Finder");
+    }
   };
 
   return (
@@ -1425,6 +1528,8 @@ function FilesManager() {
                 if (key === "mount_project") handleMountProjectDirectory();
                 if (key === "unmount_project")
                   handleUnmountProject(contextMenu.key);
+                if (key === "reveal_in_finder")
+                  handleRevealInFinder(contextMenu.key);
                 if (key === "rename") {
                   const item =
                     folders.find((f) => f.key === contextMenu.key) ||
@@ -1568,6 +1673,30 @@ function FilesManager() {
                   <span style={{ fontWeight: 500 }}>Size:</span>
                   <span>{propertiesData.size}</span>
                 </div>
+                {propertiesData.isMountedFolder && (
+                  <>
+                    <div
+                      style={{
+                        marginBottom: 12,
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span style={{ fontWeight: 500 }}>Folders:</span>
+                      <span>{propertiesData.folderCount}</span>
+                    </div>
+                    <div
+                      style={{
+                        marginBottom: 12,
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <span style={{ fontWeight: 500 }}>Files:</span>
+                      <span>{propertiesData.fileCount}</span>
+                    </div>
+                  </>
+                )}
                 <div
                   style={{
                     marginBottom: 12,
