@@ -329,7 +329,6 @@ const YamlFileEditor = (props) => {
       setYamlContent(context.inferenceConfig || "");
     }
   }, [
-    context.uploadedYamlFile,
     context.trainingConfig,
     context.inferenceConfig,
     type,
